@@ -20,15 +20,16 @@ The root page should send users straight into the product. For this proof of con
 
 ## Recommended Behavior
 
-Preferred:
+Required default:
 
 ```ts
 redirect("/dashboard");
 ```
 
-Alternative:
+Fallback only if deployment requires it:
 
 - Render the dashboard page directly if redirect behavior complicates static deployment.
+- In this fallback, force the Today navigation item to be active even though the URL is `/`.
 
 ## Requirements
 
@@ -39,6 +40,6 @@ Alternative:
 
 ## Acceptance Criteria
 
-- Visiting `/` lands the user on `/dashboard` or shows the dashboard content.
+- Visiting `/` lands the user on `/dashboard` by default, or shows the dashboard content only for a static-deployment fallback.
 - No separate marketing page exists.
-- Navigation active state still highlights Dashboard after redirect.
+- Navigation active state still highlights Today after redirect.

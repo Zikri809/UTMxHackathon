@@ -1,4 +1,4 @@
-# Calendar Page Build Spec
+# Calendar / Harvest Plan Page Build Spec
 
 ## Route And File
 
@@ -22,22 +22,31 @@ src/components/calendar/calendar-page.tsx
 
 ## Purpose
 
-The calendar turns harvest predictions into a planning tool. It should show harvest windows, prediction confidence, crop status, and whether a date is generic or sensor-adjusted.
+The calendar turns harvest estimates into an operational plan. In the UI, label this page `Harvest Plan`. It should show what work is expected this week or month and which dates need review.
 
 ## Primary User Questions
 
 - What will be ready this week or month?
-- Which harvest dates are confident?
-- Which dates changed because of sensor readings?
-- Which harvest predictions are missing sensor assignment?
-- Which crop needs feedback?
+- Which harvest dates are reliable?
+- Which dates changed because of growing conditions?
+- Which crops need devices connected?
+- Which crop needs a harvest check?
+
+## User-Friendly UX Rules
+
+- Use `Harvest Plan` as the visible page title.
+- Use `Expected ready date`, `Ready window`, and `Reliability`.
+- Use `Updated from conditions` instead of sensor-adjusted.
+- Use `Needs device connection` instead of missing sensor assignment.
+- Use `Record harvest result` instead of feedback.
+- The page should show expected work, not feel like a technical scheduler.
 
 ## Data Dependencies
 
 Use TanStack Query hooks:
 
 ```ts
-const cropBatches = useCropBatches();
+const cropSummaries = useCropBatchSummaries();
 const sensorGroups = useSensorGroups();
 ```
 
@@ -48,8 +57,9 @@ Derived data:
 - Month groups.
 - Week groups.
 - Status filters.
-- Sensor assignment filters.
+- Device connection filters.
 - Archived, cancelled, and failed crop filtering.
+- Crop focus from optional `batchId` query param.
 
 ## Page Layout
 
@@ -57,14 +67,14 @@ Recommended structure:
 
 ```text
 PageHeader
-  title: Harvest Calendar
+  title: Harvest Plan
   action: Add Crop
 
 Toolbar
   Month selector
   View toggle: Month / Week / List
   Filters: Plant type, Status, Rack
-  Sensor assignment filter
+  Device connection filter
 
 Calendar content
   Month grid or week view
@@ -88,7 +98,7 @@ Each date cell:
 Crop chip content:
 
 - Plant name.
-- Confidence indicator.
+- Reliability indicator.
 - Status color.
 
 ### Week View
@@ -105,10 +115,10 @@ Columns:
 
 - Crop.
 - Rack or zone.
-- Generic date.
-- Predicted date.
-- Harvest window.
-- Confidence.
+- Starter date.
+- Expected ready date.
+- Ready window.
+- Reliability.
 - Status.
 
 Use shadcn `Table` for this.
@@ -133,12 +143,12 @@ Use shadcn `Table` for this.
 
 Use consistent colors:
 
-- Generic baseline: blue.
-- Sensor adjusted: green.
+- Starter estimate: blue.
+- Updated from conditions: green.
 - Ready soon: amber.
 - Feedback needed: orange.
 - Completed: gray.
-- Missing sensor assignment: outlined orange warning.
+- Needs device connection: outlined orange warning.
 - Cancelled, failed, and archived: hidden by default, visible via filters.
 
 Do not rely on color alone. Include short status labels.
@@ -154,6 +164,14 @@ Click "Open crop":
 
 - Navigates to `/crops/[batchId]`.
 
+Click "Record harvest result":
+
+- Navigates to `/crops/[batchId]?tab=feedback`.
+
+Click "Connect devices":
+
+- Navigates to `/sensors?action=assign&batchId=[batchId]&returnTo=/calendar`.
+
 Click "Add Crop":
 
 - Navigates to `/crops/new`.
@@ -163,7 +181,7 @@ Filters:
 - Plant type filter.
 - Status filter.
 - Rack or zone filter.
-- Sensor assignment filter.
+- Device connection filter.
 - Include archived/cancelled/failed toggle.
 - Clear filters button.
 
@@ -173,15 +191,15 @@ Show:
 
 - Crop name.
 - Rack and zone.
-- Generic harvest date.
-- Current prediction.
-- Harvest window.
-- Confidence.
-- Sensor summary.
-- Sensor assignment status.
+- Starter date.
+- Expected ready date.
+- Ready window.
+- Reliability.
+- Conditions summary.
+- Device connection status.
 - Primary action: "View details".
-- Sensor action if assignment is missing.
-- Feedback action if status is `feedback_needed`.
+- Device action if connection is missing.
+- Harvest check action if status is `feedback_needed`.
 
 ## Loading State
 
@@ -211,11 +229,12 @@ Use shadcn `Alert` with retry.
 
 ## Acceptance Criteria
 
-- Calendar reads crop batches through TanStack Query.
+- Calendar reads crop summaries through TanStack Query.
 - Month, week, or list view exists; ideally all three if time allows.
 - Clicking a crop leads to crop details.
 - Feedback-needed crops are visually distinct.
-- Missing sensor assignment is visible on affected crop events or rows.
+- Missing device connection is visible on affected crop events or rows.
 - Cancelled, failed, and archived crops are hidden by default and available through filters.
 - Filters work without changing the underlying mock data.
-- Calendar uses the same status and confidence logic as Dashboard and Crop Detail.
+- Calendar uses the same status and reliability logic as Today and Crop Detail.
+- Visible copy avoids ML, prediction-mode, and sensor-assignment jargon.

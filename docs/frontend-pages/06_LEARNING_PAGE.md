@@ -1,4 +1,4 @@
-# Learning Page Build Spec
+# Learning / Improvements Page Build Spec
 
 ## Route And File
 
@@ -22,15 +22,25 @@ src/components/learning/learning-page.tsx
 
 ## Purpose
 
-The Learning page makes the mocked ML story visible. It should show how generic predictions become plant-specific learned predictions as more crop cycles and feedback are collected.
+The Improvements page shows that harvest estimates get better as real harvest results are recorded. In the UI, label this page `Improvements`.
+
+It should communicate business value without AI jargon: repeated crop cycles reduce the average miss between expected ready dates and actual harvest results.
 
 ## Primary User Questions
 
-- Which plants have enough data for better predictions?
-- Which custom plants are still baseline-only?
-- How much has prediction accuracy improved?
-- Which plants are still using generic estimates?
-- Did my harvest feedback improve the model?
+- Which plants have enough history for better estimates?
+- Which custom plants still use starter estimates?
+- How much has ready-date accuracy improved?
+- Did my harvest check improve future planning?
+
+## User-Friendly UX Rules
+
+- Use `Improvements` as the visible page title.
+- Use `Starter`, `Getting better`, and `Highly reliable` as primary labels.
+- Use `Average miss` instead of prediction error.
+- Use `Harvest checks` instead of feedback.
+- Avoid "model", "ML", "adaptive", and "baseline" in primary UI copy.
+- Keep technical maturity values available only in implementation data.
 
 ## Data Dependencies
 
@@ -43,13 +53,14 @@ const learningStats = useModelLearningStats();
 Optional:
 
 ```ts
-const cropBatches = useCropBatches();
+const cropSummaries = useCropBatchSummaries();
+const feedbackHistory = useHarvestFeedback(selectedBatchId); // only when showing one crop's feedback details
 const updatePlantProfile = useUpdatePlantProfile();
 ```
 
-Use crop batches if showing recent feedback history or completed crop counts.
+Use crop summaries if showing recent feedback history or completed crop counts.
 
-Learning stats should only treat `completed` crops with harvest feedback as model-training examples. `cancelled`, `failed`, and `archived` crops should not improve model accuracy unless they already had valid feedback before archival.
+Improvement stats should only treat `completed` crops with harvest checks as examples for future estimates. `cancelled`, `failed`, and `archived` crops should not improve estimate accuracy unless they already had valid harvest checks before archival.
 
 ## Page Layout
 
@@ -57,22 +68,22 @@ Recommended structure:
 
 ```text
 PageHeader
-  title: Model Learning
-  subtitle: Plant-specific prediction progress
+  title: Improvements
+  subtitle: Harvest estimates getting better over time
 
 Top summary row
   Total completed cycles
-  Average error reduction
-  Adaptive models
-  Plants still learning
+  Average miss reduced
+  Highly reliable plants
+  Plants getting better
 
 Main grid
-  Plant learning cards
+  Plant improvement cards
   Accuracy improvement chart
 
 Bottom
-  Generic vs learned model comparison
-  Recent feedback events
+  Starter vs improved estimate comparison
+  Recent harvest checks
 ```
 
 ## Components To Build
@@ -90,55 +101,55 @@ Bottom
 - shadcn `Tabs`
 - shadcn `Skeleton`
 
-## Model Maturity Levels
+## Estimate Quality Levels
 
 Use three levels:
 
 ```text
-Baseline
-Learning
-Adaptive
+Starter
+Getting better
+Highly reliable
 ```
 
-Baseline:
+Starter:
 
-- Uses generic crop maturity estimate.
-- Low confidence.
-- Not enough feedback data.
-- Custom plants start here after the user provides a generic maturity estimate.
+- Uses typical days to ready.
+- Lower reliability.
+- Not enough harvest checks yet.
+- Custom plants start here after the user provides typical days to ready.
 
-Learning:
+Getting better:
 
-- Combines generic estimate, sensor trends, and early feedback data.
-- Medium confidence.
+- Combines starter estimate, growing conditions, and early harvest checks.
+- Medium reliability.
 
-Adaptive:
+Highly reliable:
 
-- Uses plant-specific historical patterns.
-- Higher confidence.
-- Lower average prediction error.
+- Uses plant-specific harvest history.
+- Higher reliability.
+- Lower average miss.
 
-## Plant Learning Cards
+## Plant Improvement Cards
 
 Each card should show:
 
 - Plant type.
 - Source: catalog or custom.
-- Maturity level.
+- Estimate quality.
 - Completed crop cycles.
-- Average error before learning.
-- Average error now.
-- Confidence.
-- Short model note.
+- Average miss before improvements.
+- Average miss now.
+- Reliability.
+- Short improvement note.
 
 Example:
 
 ```text
 Lettuce
-Adaptive model
+Highly reliable
 124 completed cycles
-Error reduced from 5.2 days to 1.8 days
-Confidence: 86%
+Average miss reduced from 5.2 days to 1.8 days
+Reliability: 86%
 ```
 
 ## Accuracy Improvement Chart
@@ -154,49 +165,49 @@ Recommended for MVP:
 
 - Bar chart because it is fast and easy to understand.
 
-## Generic Vs Learned Comparison
+## Starter Vs Improved Comparison
 
 Show a simple comparison table:
 
 Columns:
 
 - Feature.
-- Generic estimate.
-- Learned prediction.
+- Starter estimate.
+- Improved estimate.
 
 Rows:
 
 - Inputs used.
-- Confidence.
+- Reliability.
 - Personalization.
-- Feedback loop.
-- Prediction error.
+- Harvest checks.
+- Average miss.
 
 This helps judges understand the long-term product value.
 
-## Recent Feedback Events
+## Recent Harvest Check Events
 
-Show feedback-driven updates:
+Show harvest-check-driven updates:
 
 ```text
-Spinach feedback submitted: prediction was 3 days late.
-Spinach model adjusted future estimates earlier in similar conditions.
-Lettuce model confidence increased after stable pH harvest cycle.
+Spinach harvest check recorded: estimate missed by 3 days.
+Future spinach estimates adjust earlier in similar conditions.
+Lettuce reliability improved after a stable pH harvest cycle.
 ```
 
-If no feedback exists, show seeded learning events.
+If no harvest checks exist, show seeded improvement events.
 
 ## Custom Plant Behavior
 
-Custom plants should appear in the same learning model list as catalog plants.
+Custom plants should appear in the same improvement list as catalog plants.
 
 Display rules:
 
 - Source badge: `Custom`.
-- Maturity starts as `Baseline`.
+- Estimate quality starts as `Starter`.
 - Completed crop cycles starts at `0`.
-- Confidence is lower until feedback is submitted.
-- After feedback, show the custom plant as `Learning`.
+- Reliability is lower until harvest checks are submitted.
+- After a harvest check, show the custom plant as `Getting better`.
 - Custom profiles can be edited if the initial maturity estimate or ideal ranges were entered incorrectly.
 
 Example:
@@ -204,16 +215,32 @@ Example:
 ```text
 Red Amaranth
 Custom plant
-Baseline model
+Starter estimate
 0 completed cycles
-Using user-provided 28 day maturity estimate
+Using user-provided 28 days to ready
 ```
 
 Editing custom profiles:
 
 - Allow editing custom plant name, default maturity days, and ideal ranges.
 - Do not allow editing catalog profiles in the PoC.
-- After editing a custom profile, invalidate plant profiles, affected crop predictions, and learning stats.
+- After editing a custom profile, invalidate plant profiles, affected crop estimates, and improvement stats.
+
+Edit dialog requirements:
+
+- Open only for custom plant profiles.
+- Fields: plant name, typical days to ready, ready window buffer days, and optional advanced growing ranges.
+- Validate that maturity days and range bounds are positive and that minimum values are less than maximum values.
+- Disable submit while pending.
+- On success, call `useUpdatePlantProfile`, invalidate plant profiles, crop summaries, affected crop estimates, and improvement stats, then show a toast.
+- On failure, keep the dialog open and show an inline error.
+
+## Navigation
+
+- Add crop for a starter or custom plant -> `/crops/new`.
+- Open recent harvest check crop -> `/crops/[batchId]?tab=feedback`.
+- Focus a plant improvement card -> `/learning?plantProfileId=[plantProfileId]`.
+- Open crop history, if implemented -> `/crops?plantProfileId=[plantProfileId]`.
 
 ## Loading State
 
@@ -223,7 +250,7 @@ Use skeleton cards and chart placeholder.
 
 If no learning stats exist:
 
-- Show baseline explanation.
+- Show starter-estimate explanation.
 - Link to `/crops/new`.
 
 ## Error State
@@ -232,11 +259,12 @@ Use shadcn `Alert` with retry.
 
 ## Acceptance Criteria
 
-- Learning page reads stats through `useModelLearningStats`.
-- Page shows baseline, learning, and adaptive model states.
+- Improvements page reads stats through `useModelLearningStats`.
+- Page shows starter, getting better, and highly reliable estimate states.
 - Page includes custom plant profiles after they are created.
 - User can correct custom plant profile details.
-- Feedback submitted from Crop Detail changes this page after cache invalidation.
+- Harvest check submitted from Crop Detail changes this page after cache invalidation.
 - Cancelled, failed, and archived crops do not inflate completed-cycle learning stats.
 - At least one chart visualizes accuracy improvement.
-- Page clearly explains why the system becomes better over time.
+- Page clearly explains why estimates become better over time.
+- Visible copy avoids ML, model, baseline, adaptive, and prediction-mode jargon.

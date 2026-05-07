@@ -22,16 +22,28 @@ src/components/crops/crop-detail-page.tsx
 
 ## Purpose
 
-Crop Detail is the most important proof-of-concept page. It explains how the harvest prediction is made, how sensor readings are affecting it, and how user feedback closes the learning loop.
+Crop Detail is the most important proof-of-concept page. It should answer: is this crop on track, why did the ready date change, and what should the grower do next?
+
+The page can be explainable without sounding technical. Keep detailed device and estimate logic available, but make the first view action-oriented.
 
 ## Primary User Questions
 
 - When is this crop expected to be ready?
-- How is that different from the generic estimate?
-- How confident is the prediction?
-- Which sensor conditions are helping or hurting?
-- Which sensor group is feeding readings into this crop?
-- Can I submit harvest feedback?
+- How is that different from the starter estimate?
+- How reliable is the estimate?
+- Which growing conditions are helping or hurting?
+- Which devices are tracking this crop?
+- Can I record the harvest result?
+
+## User-Friendly UX Rules
+
+- Use `Expected ready date`, `Ready window`, and `Reliability`.
+- Use `View why this changed` instead of showing prediction logic immediately.
+- Use `Conditions` instead of Sensors.
+- Use `Devices` instead of Assignment.
+- Use `History` instead of Timeline.
+- Use `Harvest Check` instead of Feedback.
+- Keep charts compact and below the main decision.
 
 ## Data Dependencies
 
@@ -42,9 +54,11 @@ const crop = useCropBatch(batchId);
 const sensorGroups = useSensorGroups();
 const readings = useSensorReadings(batchId);
 const prediction = useHarvestPrediction(batchId);
+const feedbackHistory = useHarvestFeedback(batchId);
 const feedbackMutation = useSubmitHarvestFeedback();
 const updateCrop = useUpdateCropBatch();
 const updateCropStatus = useUpdateCropStatus();
+const assignSensorGroup = useAssignSensorGroupToBatch(); // only if assignment is implemented locally
 ```
 
 Derived data:
@@ -63,20 +77,20 @@ Recommended structure:
 PageHeader
   title: Crop name
   subtitle: Rack, zone, planted date
-  actions: Back, Submit Feedback if available
+  actions: Back, Record harvest result if available
 
-Prediction hero row
-  Current Prediction
-  Generic Estimate
-  Confidence
+Estimate hero row
+  Expected Ready Date
+  Starter Estimate
+  Reliability
   Status
 
 Main content tabs
   Overview
-  Sensors
-  Assignment
-  Timeline
-  Feedback
+  Conditions
+  Devices
+  History
+  Harvest Check
   Settings
 ```
 
@@ -114,25 +128,25 @@ Mobile:
 - shadcn `Skeleton`
 - shadcn `Alert`
 
-## Prediction Summary
+## Estimate Summary
 
 Show:
 
-- Current predicted harvest date.
-- Harvest window.
-- Generic harvest date.
-- Days shifted from generic estimate.
-- Confidence score.
-- Model mode: baseline, learning, or adaptive.
+- Expected ready date.
+- Ready window.
+- Starter ready date.
+- Days changed from starter estimate.
+- Reliability score.
+- Estimate quality: starter, getting better, or highly reliable.
 
 Example copy:
 
 ```text
-Prediction shifted 2 days earlier than the generic estimate.
-Stable pH and warmer average temperature increased confidence.
+Expected ready date moved 2 days earlier than the starter estimate.
+Stable pH and warmer average temperature made this estimate more reliable.
 ```
 
-## Prediction Explanation
+## Estimate Explanation
 
 Use `HarvestPrediction.contributingFactors`.
 
@@ -144,13 +158,15 @@ Each factor should show:
 
 Examples:
 
-- Stable pH: confidence increased.
+- Stable pH: estimate is more reliable.
 - Low light: harvest may shift later.
 - Warm temperature: growth may accelerate.
 
 This section matters because the app should feel explainable, not like a black box.
 
-## Sensor Tab
+Visible section label should be `View why this changed`.
+
+## Conditions Tab
 
 Show metric cards:
 
@@ -167,13 +183,13 @@ Each metric card:
 - Ideal range.
 - Status.
 - Trend.
-- Prediction impact.
+- Estimate impact.
 
-Missing sensor type behavior:
+Missing device metric behavior:
 
-- If a sensor type is not available in the assigned group, show the metric as `Unavailable`.
+- If a metric is not available in the connected device group, show it as `Not tracked`.
 - Do not render an empty chart for unavailable metrics.
-- Explain whether the missing metric lowers confidence.
+- Explain whether the missing metric lowers reliability.
 
 Charts:
 
@@ -181,61 +197,62 @@ Charts:
 - Keep charts compact.
 - Allow metric switching with tabs or segmented buttons.
 
-## Assignment Tab Or Panel
+## Devices Tab Or Panel
 
-Show how the app knows which sensor readings belong to this crop.
+Show which devices are tracking this crop and where those readings come from.
 
 Required content:
 
-- Assigned sensor group name.
+- Connected device group name.
 - Rack and zone.
-- Sensor device list.
-- Sensor device status.
-- Sensor types available.
-- Explanation of matching rule.
+- Device list.
+- Device status.
+- Metrics available.
+- Plain-language explanation of which location is connected to the crop.
 
 Example:
 
 ```text
-Readings are linked through Sensor Group Rack C / Zone 1.
-This group is assigned to Spinach Batch SP-104, so its readings are used before rack/zone fallback.
+Device group Rack C / Zone 1 is connected to this spinach crop.
+Those readings are used for this crop's ready-date estimate.
 ```
 
-If no sensor group is assigned:
+If no device group is connected:
 
 - Show warning state.
-- Explain that the prediction is mostly generic.
-- Provide action to assign a sensor group if `useAssignSensorGroupToBatch` is implemented on this page.
+- Explain that the estimate is mostly a starter estimate.
+- Provide action to `/sensors?action=assign&batchId=[batchId]&returnTo=/crops/[batchId]` unless `useAssignSensorGroupToBatch` is implemented locally.
 
-If assignment is ambiguous:
+If connection needs review:
 
 - Show attention state.
 - Explain that multiple active crops share the same rack/zone.
-- Ask the user to assign a sensor group to this crop.
+- Ask the user to connect a device group to this crop.
+- Provide the same connection deep link to Devices & Locations with the crop preselected.
 
-## Timeline Tab
+## History Tab
 
 Timeline events:
 
 - Planted.
-- Generic estimate created.
-- Sensor readings started.
-- Prediction updated.
+- Starter estimate created.
+- Device readings started.
+- Estimate updated.
 - Ready soon.
-- Feedback submitted.
+- Harvest result recorded.
 - Completed.
 
 Use this to tell the crop journey visually.
 
-## Feedback Flow
+## Harvest Check Flow
 
-Show feedback CTA when:
+Show harvest check CTA when:
 
 - `crop.status === "feedback_needed"`, or
 - demo mode allows feedback, or
-- user clicks "Mark harvest result".
+- user clicks "Record harvest result".
 
-Feedback fields:
+Harvest check fields:
 
 - Accuracy: accurate, ready earlier, ready later, not ready yet.
 - Days off.
@@ -249,18 +266,19 @@ On submit:
 - Call `useSubmitHarvestFeedback`.
 - Invalidate crop, crops list, prediction, and learning stats.
 - Show confirmation message.
+- Treat the response as an atomic result containing feedback, updated crop, updated prediction, updated learning stats, and a timeline event.
 
-If feedback is `not_ready`:
+If harvest check is `not_ready`:
 
 - Keep crop status as `growing`.
-- Shift predicted harvest date later by `checkAgainInDays`.
+- Shift expected ready date later by `checkAgainInDays`.
 - Add a timeline event.
 - Show "Check again scheduled" confirmation instead of completed-harvest copy.
 
 Confirmation example:
 
 ```text
-Feedback saved. The spinach model learned from this crop cycle.
+Harvest result saved. Future spinach estimates will use this result.
 ```
 
 ## Settings Tab
@@ -273,7 +291,7 @@ Supported actions:
 - Edit plant count.
 - Edit rack/zone.
 - Edit notes.
-- Change sensor assignment.
+- Change device connection.
 - Mark crop as cancelled.
 - Mark crop as failed.
 - Archive crop.
@@ -281,7 +299,8 @@ Supported actions:
 Rules:
 
 - Completed, cancelled, failed, and archived crops should not be editable except notes and archive/restore actions.
-- Changing rack/zone should prompt the user to review sensor assignment.
+- Changing rack/zone should prompt the user to review device connection.
+- Device connection changes should route to `/sensors?action=assign&batchId=[batchId]&returnTo=/crops/[batchId]` unless a local connection dialog is implemented.
 - Archiving hides the crop from default Dashboard and Calendar views.
 - Cancelled means the crop was created by mistake.
 - Failed means the crop was real but lost before harvest.
@@ -291,8 +310,8 @@ Rules:
 Use skeletons for:
 
 - Header.
-- Prediction cards.
-- Sensor cards.
+- Estimate cards.
+- Condition cards.
 - Chart area.
 
 ## Not Found State
@@ -308,14 +327,15 @@ Use shadcn `Alert` with retry.
 
 ## Acceptance Criteria
 
-- Crop detail loads crop, prediction, and sensor readings through TanStack Query.
-- Page explains prediction shift from generic estimate.
-- Sensor readings are visible as metrics and at least one chart.
-- Missing sensor types are shown as unavailable.
-- Page shows which sensor group or devices are assigned to the crop.
-- If no sensor is assigned, the page explains the impact on confidence.
-- Feedback can be submitted from this page.
+- Crop detail loads crop, estimate, and condition readings through TanStack Query.
+- Page explains ready-date changes from the starter estimate.
+- Growing conditions are visible as metrics and at least one chart.
+- Missing device metrics are shown as not tracked.
+- Page shows which device group or devices are connected to the crop.
+- If no devices are connected, the page explains the impact on reliability.
+- Harvest checks can be submitted from this page.
 - `Not ready yet` feedback keeps the crop active and schedules another check.
 - User can edit, cancel, fail, or archive the crop from this page.
-- Submitting feedback updates the Learning page data.
+- Recording a harvest result updates the Improvements page data.
 - Loading, error, and not found states exist.
+- Visible copy avoids ML, model, prediction-mode, and sensor-assignment jargon.

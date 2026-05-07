@@ -1,4 +1,4 @@
-# Sensors Page Build Spec
+# Sensors / Devices & Locations Page Build Spec
 
 ## Route And File
 
@@ -22,17 +22,27 @@ src/components/sensors/sensors-page.tsx
 
 ## Purpose
 
-The Sensors page explains and manages how sensor readings are connected to crop batches. The system should not imply that sensors automatically know which plant they belong to. Instead, readings are linked through explicit sensor devices, sensor groups, rack and zone placement, and optional crop batch assignment.
+The Devices & Locations page explains and manages which devices are connected to which crops and growing locations. The system should not imply that devices automatically know which plant they belong to.
+
+In the UI, label this page `Devices & Locations`. It should feel like equipment placement and crop connection, not an IoT administration console.
 
 ## Primary User Questions
 
-- Which sensors are online?
-- Where is each sensor physically located?
-- Which crop batch is each sensor group assigned to?
-- Are any readings ambiguous because multiple crops share the same rack or zone?
-- Are any crops missing sensor assignment?
-- Are any required sensor types missing for a crop?
+- Which devices are online?
+- Where is each device physically located?
+- Which crop is each device group connected to?
+- Do any crops need device connection review?
+- Are any crops missing expected condition readings?
 - What if a rack or zone is not listed yet?
+
+## User-Friendly UX Rules
+
+- Use `Devices & Locations` as the visible page title.
+- Use `Device group` instead of sensor group.
+- Use `Connect devices` instead of assign sensors.
+- Use `Needs review` instead of ambiguous fallback.
+- Use `Not tracked` instead of unavailable sensor type.
+- Keep the matching rule out of the first view; show it only under "Why this crop uses these readings".
 
 ## Data Dependencies
 
@@ -41,7 +51,7 @@ Use TanStack Query hooks:
 ```ts
 const sensorDevices = useSensorDevices();
 const sensorGroups = useSensorGroups();
-const cropBatches = useCropBatches();
+const cropSummaries = useCropBatchSummaries();
 const farmLocations = useFarmLocations();
 const createFarmLocation = useCreateFarmLocation();
 const updateFarmLocation = useUpdateFarmLocation();
@@ -50,17 +60,17 @@ const assignSensorGroup = useAssignSensorGroupToBatch();
 
 Derived data:
 
-- Assigned sensor groups.
-- Unassigned sensor groups.
-- Offline sensor devices.
-- Crop batches without sensor assignment.
+- Connected device groups.
+- Unconnected device groups.
+- Offline devices.
+- Crop batches without device connection.
 - Ambiguous rack/zone matches.
-- Missing sensor types per crop.
-- Farm locations without sensor groups.
+- Missing condition metrics per crop.
+- Farm locations without device groups.
 
-## Sensor Ownership Model
+## Device Connection Model
 
-The frontend should use this rule:
+The technical implementation should use this rule:
 
 ```text
 batchId assignment > sensorGroup assignment > rack/zone fallback
@@ -68,10 +78,23 @@ batchId assignment > sensorGroup assignment > rack/zone fallback
 
 Meaning:
 
-1. If a sensor group has `assignedBatchId`, its readings belong to that crop batch.
+1. If a device group has `assignedBatchId`, its readings belong to that crop batch.
 2. If a crop has `sensorGroupId`, readings from that group belong to the crop.
-3. If no direct assignment exists, the mock API can match readings by rack and zone.
-4. If more than one active crop shares the same rack and zone, fallback is ambiguous and the UI must ask for assignment.
+3. If no direct connection exists, the mock API can match readings by rack and zone.
+4. If more than one active crop shares the same rack and zone, fallback needs review and the UI must ask the user to connect devices.
+
+Visible UI should summarize this as:
+
+```text
+These devices are connected to this crop's growing location.
+```
+
+Implementation invariant:
+
+- `CropBatch.sensorGroupId` and `SensorGroup.assignedBatchId` must be updated together through `assignSensorGroupToBatch`.
+- A device group can be connected to only one active crop batch at a time.
+- Reconnecting a group from one crop to another requires confirmation and disconnects the previous crop.
+- Use `farmLocationId` as the stable matching key when available. Rack and zone are display and fallback labels.
 
 ## Page Layout
 
@@ -79,23 +102,23 @@ Recommended structure:
 
 ```text
 PageHeader
-  title: Sensors
-  subtitle: Device placement and crop assignment
+  title: Devices & Locations
+  subtitle: Equipment placement and crop connections
 
 Top summary row
   Online Devices
-  Assigned Groups
-  Unassigned Groups
-  Crops Missing Sensors
-  Missing Sensor Types
+  Connected Groups
+  Unconnected Groups
+  Crops Needing Devices
+  Missing Metrics
 
 Main content
   Farm Location Table
-  Sensor Group Table
-  Sensor Device Table
+  Device Group Table
+  Device Table
 
 Side panel or dialog
-  Assign sensor group to crop batch
+  Connect device group to crop
 ```
 
 ## Components To Build
@@ -123,7 +146,7 @@ Columns:
 - Location label.
 - Rack.
 - Zone.
-- Sensor group count.
+- Device group count.
 - Active crop count.
 - Status.
 - Actions.
@@ -132,115 +155,119 @@ Actions:
 
 - Add rack/zone.
 - Edit location.
-- View matching sensor groups.
+- View matching device groups.
 
-Users should be able to create a missing rack or zone here, then use it in Add Crop and sensor assignment flows.
+Users should be able to create a missing rack or zone here, then use it in Add Crop and device connection flows.
 
-Editing a location should call `useUpdateFarmLocation` and refresh affected crop, sensor group, and sensor device displays.
+Editing a location should call `useUpdateFarmLocation` and refresh affected crop, device group, and device displays.
 
-## Sensor Group Table
+New locations can exist without device groups. Show those locations as placement-only until a device group is moved or created for that location. Device group creation is optional for the PoC; if it is not implemented, guide users to create the crop with "No devices connected yet" and connect devices later.
+
+## Device Group Table
 
 Columns:
 
 - Group name.
 - Rack.
 - Zone.
-- Sensor count.
-- Sensor types.
-- Missing sensor types for assigned crop.
-- Assigned crop batch.
-- Assignment status.
+- Device count.
+- Metrics tracked.
+- Missing metrics for connected crop.
+- Connected crop.
+- Connection status.
 - Actions.
 
 Actions:
 
-- Assign to crop.
-- Change assignment.
+- Connect to crop.
+- Change connection.
 - View crop if assigned.
 
-Assignment status:
+Connection status:
 
-- Assigned.
-- Unassigned.
-- Ambiguous fallback.
+- Connected.
+- Unconnected.
+- Needs review.
 - Offline devices.
-- Missing required sensor type.
+- Missing expected metric.
 
-## Sensor Device Table
+## Device Table
 
 Columns:
 
 - Device name.
-- Sensor types.
+- Metrics tracked.
 - Rack.
 - Zone.
 - Group.
 - Status.
-- Assigned crop.
+- Connected crop.
 
-Sensor status:
+Device status:
 
 - Online.
 - Offline.
 - Maintenance.
 
-Missing sensor type behavior:
+Missing metric behavior:
 
-- Show missing metrics as `Unavailable`, not as broken charts.
-- If a crop lacks pH, EC, light, or other expected readings, show which sensor type is missing.
-- Explain that the prediction can still run, but confidence may be lower.
+- Show missing metrics as `Not tracked`, not as broken charts.
+- If a crop lacks pH, EC, light, or other expected readings, show which metric is missing.
+- Explain that the estimate can still run, but reliability may be lower.
 
-## Assign Sensor Dialog
+## Connect Devices Dialog
 
-The dialog should allow the user to assign a sensor group to an active crop batch.
+The dialog should allow the user to connect a device group to an active crop batch.
 
 Fields:
 
-- Sensor group.
+- Device group.
 - Crop batch.
 
 Helpful display:
 
 - Show crop plant name, rack, zone, and status.
 - Highlight matching rack/zone crops.
-- Warn if assigning a group to a crop in a different rack/zone.
-- Warn if the sensor group does not include expected sensor types for the crop.
+- Warn if connecting a group to a crop in a different rack/zone.
+- Warn if the device group does not include expected metrics for the crop.
 
 On submit:
 
 - Call `useAssignSensorGroupToBatch`.
-- Invalidate sensor groups, sensor devices, crop batch, crop list, sensor readings, and prediction.
-- Show success toast.
+- Invalidate device groups, devices, crop batch, crop list, crop summaries, condition readings, and harvest estimate.
+- If the group was previously assigned, invalidate the previous crop batch and its prediction as well.
+- Show success toast: "Devices connected."
+- Navigate back to the `returnTo` route if present.
 
-## Missing Sensor Assignment Panel
+## Missing Device Connection Panel
 
 Show crop batches where:
 
 - `sensorGroupId` is missing, or
-- assigned sensor group is offline, or
+- connected device group is offline, or
 - rack/zone fallback is ambiguous.
 
 Each item should have:
 
 - Crop name.
 - Rack and zone.
-- Current prediction confidence.
-- "Assign sensors" action.
+- Current estimate reliability.
+- "Connect devices" action.
 
 ## Loading State
 
 Use skeletons for:
 
 - Summary cards.
-- Sensor group table rows.
-- Sensor device table rows.
+- Device group table rows.
+- Device table rows.
 
 ## Empty State
 
-If no sensor devices exist:
+If no devices exist:
 
 ```text
-No sensor devices are registered in the mock farm.
+No devices are registered in the demo farm.
 ```
 
 For the PoC, this should not happen with seed data, but the state should exist.
@@ -249,14 +276,25 @@ For the PoC, this should not happen with seed data, but the state should exist.
 
 Use shadcn `Alert` with retry.
 
+## Navigation
+
+The Devices & Locations page must preserve connection context from other pages:
+
+- `/sensors?batchId=[batchId]` highlights the crop's current device connection state.
+- `/sensors?action=assign&batchId=[batchId]&returnTo=[encoded-route]` opens `ConnectDevicesDialog` with the crop preselected.
+- View crop -> `/crops/[batchId]`.
+- Add crop for a location -> `/crops/new?farmLocationId=[farmLocationId]`.
+- After successful assignment, return to `returnTo` if it exists.
+
 ## Acceptance Criteria
 
-- Sensors page loads sensor devices, sensor groups, and crop batches through TanStack Query.
-- Sensors page loads and can create farm locations through TanStack Query.
+- Devices & Locations loads devices, device groups, and crop summaries through TanStack Query.
+- Devices & Locations loads and can create farm locations through TanStack Query.
 - User can edit farm locations without breaking existing crop and sensor displays.
-- User can see which sensor group belongs to which crop.
-- User can assign or change a sensor group assignment.
-- Ambiguous rack/zone fallback is called out clearly.
-- Missing sensor types are called out clearly.
-- Crop Detail can explain sensor readings using the same assignment model.
-- Assignment changes affect prediction and sensor readings after query invalidation.
+- User can see which device group is connected to which crop.
+- User can connect or change a device group connection.
+- Needs-review rack/zone fallback is called out clearly.
+- Missing metrics are called out clearly.
+- Crop Detail can explain condition readings using the same connection model.
+- Connection changes affect estimates and condition readings after query invalidation.
+- Visible copy avoids IoT, sensor-provenance, and assignment jargon.

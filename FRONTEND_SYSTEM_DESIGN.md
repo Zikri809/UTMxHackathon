@@ -2,37 +2,56 @@
 
 ## 1. Product Summary
 
-Harvest Calendar is a proof-of-concept frontend for a vertical farming harvest prediction system. The app starts with generic crop harvest estimates, monitors mocked sensor readings during the growth period, updates the predicted harvest window, and collects user feedback after harvest. That feedback is then shown as model-learning progress so users can understand how the system improves over time.
+Harvest Calendar is a proof-of-concept frontend for a vertical farming harvest planning system. The app starts with starter crop estimates, monitors growing conditions during the crop cycle, updates the expected ready window, and collects grower harvest checks. Those harvest checks are then shown as improvements so users can understand how future estimates get better over time.
 
 For the hackathon phase, the frontend will mock API calls, sensor data, and machine-learning behavior. The main goal is to prove the user journey and communicate the value of the learning loop.
 
+Business positioning:
+
+Harvest Calendar should be presented as a controlled-environment agriculture operations tool, not a broad AI farming platform. Its wedge is harvest planning: connecting crop batches, device locations, estimate reliability, and grower harvest checks so farms can reduce harvest-timing surprises and improve future crop-cycle estimates.
+
+User-facing language:
+
+The implementation can use terms like model, prediction, sensor assignment, confidence, and mock API. The visible product should translate those ideas into grower language:
+
+- Prediction -> harvest estimate.
+- Predicted harvest date -> expected ready date.
+- Harvest window -> ready window.
+- Confidence -> reliability.
+- Sensor assignment -> connect devices.
+- Feedback -> harvest check.
+- Learning page -> Improvements.
+- Sensors page -> Devices & Locations.
+
+The user should not need to understand machine learning, backend mocking, or sensor provenance to complete the main flow.
+
 ## 2. Core Product Promise
 
-Most farming dashboards monitor conditions. Harvest Calendar connects crop planning, environmental monitoring, prediction, and grower feedback into one learning loop.
+Most farming dashboards monitor conditions. Harvest Calendar connects crop planning, growing conditions, ready-date estimates, and grower harvest checks into one practical planning loop.
 
 The user should understand this loop within the first minute:
 
 1. A crop is planted.
-2. The app creates a generic harvest estimate.
-3. Mocked sensors collect growing-condition data.
-4. The prediction adjusts as conditions change.
-5. The user confirms whether the harvest prediction was accurate.
-6. The app shows that future predictions improve from feedback.
+2. The app creates a starter harvest estimate.
+3. Devices collect growing-condition data.
+4. The expected ready date adjusts as conditions change.
+5. The user records whether the crop was actually ready.
+6. The app shows that future estimates improve from harvest checks.
 
 ## 3. Frontend Scope
 
 ### In Scope
 
-- Dashboard for active crops and upcoming harvests.
-- Add crop flow with generic harvest estimate.
+- Today view for active crops and upcoming harvests.
+- Add crop flow with starter harvest estimate.
 - Custom plant flow for plants that are not in the preset catalog.
-- Harvest calendar with predicted harvest windows.
-- Crop detail page with sensor trends and prediction explanation.
-- Sensor assignment model that maps devices to rack, zone, and crop batch.
+- Harvest Plan with expected ready windows.
+- Crop detail page with growing-condition trends and estimate explanation.
+- Device connection model that maps devices to rack, zone, and crop batch.
 - Farm location setup for racks and zones that are not already listed.
 - Edit, archive, cancel, and failed-crop flows so mistakes do not trap the user.
-- Harvest feedback flow.
-- Model learning summary page.
+- Harvest check flow.
+- Improvements summary page.
 - Mock API layer for crops, sensors, predictions, and feedback.
 - TanStack Query data layer for mocked API calls, caching, loading states, mutations, and invalidation.
 - Mock ML behavior that reacts to crop conditions and feedback.
@@ -52,7 +71,7 @@ The user should understand this loop within the first minute:
 
 ### Primary User
 
-A vertical farm operator who manages crop batches across racks, zones, or grow trays. They want to know what is ready soon, what needs attention, and whether harvest predictions are becoming more reliable.
+A vertical farm operator who manages crop batches across racks, zones, or grow trays. They want to know what is ready soon, what needs attention, and whether harvest estimates are becoming more reliable.
 
 ### Secondary User
 
@@ -66,67 +85,67 @@ A hackathon judge or stakeholder evaluating whether the idea can become a useful
 2. User clicks "Add Crop".
 3. User selects a plant type such as lettuce, basil, spinach, or kale, or adds a custom plant profile.
 4. User enters planting date, growing method, rack, zone, and plant count, creating a new rack/zone if needed.
-5. User confirms which sensor group, rack, or zone will provide readings for this crop.
-6. App creates a crop batch and returns a generic harvest estimate.
-7. User sees the crop appear on the dashboard and calendar.
-8. Mock sensor readings update the crop detail page.
-9. Prediction moves earlier or later based on mocked growing conditions.
-10. When the harvest date arrives, the app asks whether the prediction was accurate.
-11. User submits actual harvest feedback.
-12. App shows a learning confirmation and updates the model learning stats.
-13. Future crop batches show higher confidence or adjusted estimates for similar crops.
+5. User confirms which device group, rack, or zone will provide condition readings for this crop.
+6. App creates a crop batch and returns a starter harvest estimate.
+7. User sees the crop appear on Today and Harvest Plan.
+8. Condition readings update the crop detail page.
+9. The ready date moves earlier or later based on growing conditions.
+10. When the harvest date arrives, the app asks whether the crop was actually ready.
+11. User records the actual harvest result.
+12. App shows a confirmation and updates improvement stats.
+13. Future crop batches show higher reliability or adjusted estimates for similar crops.
 
 ### Journey: Returning User
 
-1. User opens dashboard.
+1. User opens Today.
 2. User sees active crops ranked by harvest urgency.
-3. User notices one crop has a prediction shift because of sensor conditions.
+3. User notices one crop has a ready-date change because of growing conditions.
 4. User opens crop detail.
-5. User reviews sensor trends and prediction explanation.
-6. User acts on the crop or submits harvest feedback when ready.
+5. User reviews condition trends and the ready-date explanation.
+6. User acts on the crop or records a harvest result when ready.
 
 ## 6. Information Architecture
 
 Recommended navigation:
 
-- Dashboard
-- Calendar
+- Today
+- Harvest Plan
 - Crops
-- Sensors
-- Learning
+- Devices & Locations
+- Improvements
 
-For a fast MVP, Dashboard, Add Crop, Crop Detail, Sensors, Calendar, and Learning are enough. Crop Detail can contain most sensor insights, while the Sensors page explains device placement and crop assignment.
+For a fast MVP, Today, Add Crop, Crop Detail, Devices & Locations, Harvest Plan, and Improvements are enough. Crop Detail can contain most condition insights, while Devices & Locations explains where readings come from and lets users connect devices.
 
 ## 7. Page And Feature Plan
 
-### 7.1 Dashboard
+### 7.1 Today
 
-Purpose: Give the user a quick farm status overview.
+Purpose: Give the user a quick daily farm status overview.
 
 Key components:
 
 - Active crop summary cards.
 - Upcoming harvest list.
-- Prediction confidence indicator.
+- Estimate reliability indicator.
 - Environment health summary.
-- Recent learning updates.
+- Recent improvement updates.
 - Add crop button.
 
 Primary content:
 
 - Number of active batches.
 - Number of crops ready soon.
-- Average model confidence.
-- Crop batches with current prediction and status.
+- Average estimate reliability.
+- Crop batches with current expected ready date and status.
 
 Example card:
 
 ```text
 Butterhead Lettuce
 Planted: May 7
-Generic estimate: Jun 6
-Current prediction: Jun 4
-Confidence: 76%
+Starter estimate: Jun 6
+Expected ready date: Jun 4
+Reliability: 76%
 Status: Growing well
 ```
 
@@ -135,46 +154,46 @@ Dashboard behavior:
 - Clicking a crop opens the crop detail page.
 - Clicking "Add Crop" opens the add crop flow.
 - Crops with harvest dates within 3 days should be visually prioritized.
-- Crops with poor sensor conditions should show an attention state.
+- Crops with poor growing conditions should show an attention state.
 
 ### 7.2 Add Crop Flow
 
-Purpose: Let the user create a crop batch and immediately understand the baseline prediction.
+Purpose: Let the user create a crop batch and immediately understand the starter harvest estimate.
 
 Fields:
 
 - Plant type.
 - Custom plant name if the plant is not in the catalog.
-- Generic maturity estimate for custom plants.
+- Typical days to ready for custom plants.
 - Ideal growing ranges for custom plants, optional.
 - Variety.
 - Planting date.
 - Growing method: hydroponic, soil, aeroponic.
 - Rack or zone.
 - Custom rack or zone if the growing location is not listed.
-- Sensor group or assigned sensor devices.
+- Device group or assigned devices.
 - Number of plants.
 - Optional notes.
 
 Custom plant behavior:
 
 - The plant selector should include an "Add custom plant" option.
-- A custom plant starts with a user-provided baseline maturity estimate because the system has no historical model yet.
-- Optional ideal ranges allow the mocked prediction engine to interpret sensor readings for the new plant.
-- If the user does not provide ideal ranges, the system uses conservative default ranges and marks the model as `baseline`.
-- After harvest feedback is submitted, the custom plant appears in Learning as a plant-specific model that is beginning to learn.
+- A custom plant starts with user-provided typical days to ready because the system has no harvest history yet.
+- Optional ideal ranges help the estimate interpret condition readings for the new plant.
+- If the user does not provide ideal ranges, the system uses conservative defaults and marks the estimate as starter quality.
+- After a harvest check is recorded, the custom plant appears in Improvements as a plant whose estimates are getting better.
 
 After submit:
 
 - App creates a mocked crop batch.
-- App shows generic estimate.
-- App shows harvest window.
-- App explains that prediction will improve as sensor data is collected.
+- App shows starter estimate.
+- App shows ready window.
+- App explains that estimates can improve as devices and harvest checks are added.
 
 Correction behavior:
 
 - User can edit crop details after creation.
-- User can change planting date, rack, zone, plant count, notes, and sensor assignment.
+- User can change planting date, rack, zone, plant count, notes, and device connection.
 - User can archive duplicate or test crops.
 - User can cancel a crop that was created by mistake.
 - User can mark a crop as failed if the batch is lost before harvest.
@@ -183,9 +202,9 @@ Example result:
 
 ```text
 Crop batch created.
-Generic estimate: 30 days.
-Expected harvest window: Jun 4 to Jun 8.
-Prediction confidence: 48%.
+Starter estimate: 30 days.
+Ready window: Jun 4 to Jun 8.
+Reliability: 48%.
 ```
 
 ### 7.3 Harvest Calendar
@@ -200,18 +219,18 @@ Views:
 
 Calendar item states:
 
-- Generic estimate only.
-- Sensor-adjusted prediction.
+- Starter estimate only.
+- Updated from conditions.
 - Ready soon.
-- Feedback needed.
+- Harvest check needed.
 - Completed.
 
 Suggested color logic:
 
-- Blue: generic baseline estimate.
-- Green: high-confidence prediction.
+- Blue: starter estimate.
+- Green: high-reliability estimate.
 - Yellow: medium confidence or small warning.
-- Orange: attention needed.
+- Orange: derived attention state.
 - Gray: completed harvest.
 
 Calendar interactions:
@@ -222,35 +241,35 @@ Calendar interactions:
 
 ### 7.4 Crop Detail Page
 
-Purpose: Show why the prediction changed and what the system has learned about this crop.
+Purpose: Show why the ready date changed and what the grower should do next.
 
 Sections:
 
 - Crop summary header.
-- Prediction panel.
-- Growth timeline.
-- Sensor charts.
-- Prediction explanation.
-- Harvest feedback call-to-action.
+- Estimate panel.
+- Growth history.
+- Condition charts.
+- Estimate explanation.
+- Harvest check call-to-action.
 
-Prediction panel:
+Estimate panel:
 
-- Generic harvest date.
-- Current predicted harvest date.
-- Predicted harvest window.
-- Confidence score.
-- Days shifted from baseline.
+- Starter ready date.
+- Expected ready date.
+- Ready window.
+- Reliability score.
+- Days changed from starter estimate.
 - Current readiness status.
 
 Example explanation:
 
 ```text
 The original estimate was Jun 6.
-Based on warmer average temperature and stable pH, the system now predicts Jun 4.
-Confidence increased from 52% to 76% after 14 days of readings.
+Based on warmer average temperature and stable pH, the expected ready date is now Jun 4.
+Reliability increased from 52% to 76% after 14 days of readings.
 ```
 
-Sensor chart tabs:
+Condition chart tabs:
 
 - Temperature.
 - Humidity.
@@ -259,12 +278,12 @@ Sensor chart tabs:
 - Light exposure.
 - Moisture or growing medium condition.
 
-Each sensor card should include:
+Each condition card should include:
 
 - Current reading.
 - Ideal range.
 - Trend direction.
-- Impact on prediction.
+- Impact on estimate.
 
 Example:
 
@@ -273,28 +292,28 @@ pH
 Current: 5.9
 Ideal: 5.5 - 6.5
 Status: Optimal
-Prediction impact: Confidence increased
+Estimate impact: Reliability increased
 ```
 
-### 7.5 Sensor Insights
+### 7.5 Condition Insights
 
-Purpose: Translate raw sensor readings into understandable farming signals.
+Purpose: Translate raw condition readings into understandable farming signals.
 
 This can be a standalone page or embedded in Crop Detail.
 
-Sensor ownership model:
+Device connection model:
 
-- Sensors do not magically know the plant. They belong to a physical location or are assigned to a crop batch.
-- For the PoC, each sensor device has a `rack`, `zone`, and optional `assignedBatchId`.
-- When a crop is created, the user selects the rack/zone and may select a sensor group.
+- Devices do not magically know the plant. They belong to a physical location or are connected to a crop batch.
+- For the PoC, each device has a `rack`, `zone`, and optional `assignedBatchId`.
+- When a crop is created, the user selects the rack/zone and may select a device group.
 - The app links readings to the crop by matching `assignedBatchId` first, then `rack` and `zone`.
-- If multiple active crops share the same rack/zone, the UI must ask the user to assign the sensor group to one crop batch to avoid ambiguous readings.
+- If multiple active crops share the same rack/zone, the UI must ask the user to connect a device group to one crop batch to avoid unclear readings.
 
 Insight types:
 
 - "Temperature has stayed above ideal range for 3 days. Growth may accelerate."
 - "Light exposure is below target. Harvest may shift 2 days later."
-- "pH is stable. Confidence increased."
+- "pH is stable. Estimate reliability improved."
 - "EC is low. Nutrient condition may delay maturity."
 
 Insight severity:
@@ -305,59 +324,59 @@ Insight severity:
 
 For the hackathon demo, insights should be deterministic and explainable, not random.
 
-### 7.6 Sensor Assignment Page
+### 7.6 Devices & Locations Page
 
-Purpose: Show how the system knows which sensor readings belong to which crop batch.
+Purpose: Show how the system knows which condition readings belong to which crop batch.
 
 This page answers the practical IoT question:
 
 ```text
-A sensor belongs to a physical location or sensor group first. A crop receives readings when that group is assigned to the crop batch.
+A device belongs to a physical location or device group first. A crop receives readings when that group is connected to the crop batch.
 ```
 
 Key sections:
 
-- Online sensor devices.
-- Sensor groups by rack and zone.
-- Assigned crop batch per sensor group.
-- Unassigned sensor groups.
-- Crops missing sensor assignment.
-- Ambiguous rack/zone matches.
+- Online devices.
+- Device groups by rack and zone.
+- Connected crop batch per device group.
+- Unconnected device groups.
+- Crops missing device connection.
+- Rack/zone matches that need review.
 
 Assignment rules:
 
 - Direct crop batch assignment wins.
-- Sensor group assignment is the normal PoC path.
+- Device group connection is the normal PoC path.
 - Rack/zone fallback is allowed only when one active crop exists in that rack/zone.
-- If multiple crops share the same rack/zone, the user must assign the sensor group explicitly.
+- If multiple crops share the same rack/zone, the user must connect the device group explicitly.
 
 User actions:
 
-- Assign sensor group to crop.
-- Change sensor group assignment.
+- Connect device group to crop.
+- Change device group connection.
 - Open assigned crop detail page.
-- See warning if a crop has no assigned sensors.
+- See warning if a crop has no connected devices.
 
-### 7.7 Harvest Feedback Flow
+### 7.7 Harvest Check Flow
 
 Purpose: Complete the learning loop.
 
 Trigger:
 
-- Crop reaches predicted harvest date.
+- Crop reaches expected ready date.
 - User marks crop as ready.
 - Demo mode allows forcing a crop into feedback-needed state.
 
 Questions:
 
 - Was this crop ready to harvest?
-- Was the prediction accurate?
+- Was the estimate accurate?
 - If off, how many days early or late?
 - Actual harvest date.
 - Harvest quality rating.
 - Optional notes.
 
-Feedback options:
+Harvest check options:
 
 - Accurate.
 - Ready earlier.
@@ -367,24 +386,23 @@ Feedback options:
 If the user selects `Not ready yet`:
 
 - Ask when to check again.
-- Shift the predicted harvest date forward by the selected number of days.
+- Shift the expected ready date forward by the selected number of days.
 - Keep the crop active instead of completed.
-- Lower confidence slightly because the prior estimate was wrong.
-- Show a new feedback prompt on the next check date.
+- Lower reliability slightly because the prior estimate was wrong.
+- Show a new harvest-check prompt on the next check date.
 
 After submit:
 
 - Show confirmation.
 - Update crop status to completed or still growing.
-- Update learning stats.
-- Show how the feedback affects future predictions.
+- Update improvement stats.
+- Show how the harvest check affects future estimates.
 
 Example confirmation:
 
 ```text
-Feedback saved.
-The lettuce model learned from this crop cycle.
-Future lettuce predictions in similar conditions will shift 2 days earlier.
+Harvest result saved.
+Future lettuce estimates in similar conditions will shift 2 days earlier.
 ```
 
 ### 7.8 Farm Location Setup
@@ -395,8 +413,8 @@ Location behavior:
 
 - Add Crop should show existing farm locations.
 - If the user cannot find the right rack or zone, they can create one inline.
-- Sensors page can also manage rack and zone metadata.
-- Sensor groups are attached to farm locations.
+- Devices & Locations can also manage rack and zone metadata.
+- Device groups are attached to farm locations.
 - Crop batches are attached to farm locations.
 
 Minimum fields:
@@ -408,33 +426,35 @@ Minimum fields:
 
 This avoids a second fixed-list trap: unknown plants are handled by custom plant profiles, and unknown locations are handled by custom farm locations.
 
-### 7.9 Model Learning Page
+### 7.9 Improvements Page
 
-Purpose: Make the mocked ML value visible.
+Purpose: Make estimate improvement visible without AI jargon.
 
 Sections:
 
-- Model overview.
-- Plant-specific model cards.
+- Improvement overview.
+- Plant-specific improvement cards.
 - Accuracy improvement chart.
-- Feedback history.
-- Generic vs learned model comparison.
+- Harvest check history.
+- Starter vs improved estimate comparison.
 
 Example plant card:
 
 ```text
 Lettuce
 Completed crop cycles: 124
-Average error before learning: 5.2 days
-Average error now: 1.8 days
-Model confidence: High
+Average miss before: 5.2 days
+Average miss now: 1.8 days
+Reliability: High
 ```
 
-Model maturity levels:
+Visible estimate quality levels:
 
-- Baseline: uses generic estimate.
-- Learning: combines generic estimate with sensor trends.
-- Adaptive: uses crop-specific historical patterns.
+- Starter: uses typical days to ready.
+- Getting better: combines starter estimate with growing conditions and harvest checks.
+- Highly reliable: uses plant-specific harvest history.
+
+Implementation can still store these as baseline, learning, and adaptive, but the UI should use the friendlier labels.
 
 ## 8. Frontend State Model
 
@@ -790,21 +810,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
 }
 ```
 
-## 10. Mock ML Behavior
+## 10. Mock Estimate Behavior
 
-The mocked model should feel logical and inspectable.
+The mocked estimate behavior should feel logical and inspectable.
 
-Prediction adjustment rules:
+Estimate adjustment rules:
 
 - Higher average temperature within acceptable range can shift harvest earlier.
 - Low light exposure shifts harvest later.
-- Stable pH increases confidence.
-- pH outside ideal range decreases confidence.
+- Stable pH increases reliability.
+- pH outside ideal range decreases reliability.
 - Low EC can shift harvest later.
-- More completed crop cycles increase confidence.
-- Recent feedback for the same plant profile adjusts future predictions.
-- Custom plants use their `PlantProfile.defaultMaturityDays` and ideal ranges until enough feedback exists.
-- If a custom plant has missing ideal ranges, prediction confidence should start lower and the explanation should say the system is using conservative defaults.
+- More completed crop cycles increase reliability.
+- Recent harvest checks for the same plant profile adjust future estimates.
+- Custom plants use their `PlantProfile.defaultMaturityDays` and ideal ranges until enough harvest checks exist.
+- If a custom plant has missing ideal ranges, estimate reliability should start lower and the explanation should say the system is using conservative defaults.
 
 Example pseudo-logic:
 
@@ -859,42 +879,45 @@ Rules:
 
 - Shift predicted harvest date by `checkAgainInDays`.
 - Keep crop in active lists.
-- Reduce confidence slightly.
-- Add a timeline event explaining that feedback delayed the next check.
+- Reduce reliability slightly.
+- Add a history event explaining that the harvest check delayed the next check.
 
-Archived, cancelled, and failed crops should not appear in default Dashboard or Calendar active views, but they should remain visible in Crops when the user enables the relevant status filter.
+Archived, cancelled, and failed crops should not appear in default Today or Harvest Plan active views, but they should remain visible in Crops when the user enables the relevant status filter.
 
 ## 11. Demo Data Plan
 
 Seed crops:
 
 1. Butterhead Lettuce
-   - Status: growing well.
-   - Prediction shifted 2 days earlier.
-   - Confidence: 76%.
+   - Lifecycle: growing.
+   - Health: healthy.
+   - Ready date shifted 2 days earlier.
+   - Reliability: 76%.
 
 2. Thai Basil
-   - Status: attention needed.
+   - Lifecycle: growing.
+   - Health: attention.
    - Low light exposure.
-   - Prediction shifted 2 days later.
-   - Confidence: 61%.
+   - Ready date shifted 2 days later.
+   - Reliability: 61%.
 
 3. Spinach
-   - Status: feedback needed.
-   - User can complete the feedback loop during the demo.
-   - Confidence: 82%.
+   - Status: harvest check needed.
+   - User can complete the harvest-check loop during the demo.
+   - Reliability: 82%.
 
 4. Kale
-   - Status: generic baseline.
-   - New crop with little sensor history.
-   - Confidence: 47%.
+   - Lifecycle: growing.
+   - Estimate quality: starter.
+   - New crop with little condition history.
+   - Reliability: 47%.
 
-Seed learning stats:
+Seed improvement stats:
 
-- Lettuce: adaptive model.
-- Basil: learning model.
-- Spinach: learning model.
-- Kale: baseline model.
+- Lettuce: highly reliable estimates.
+- Basil: getting better.
+- Spinach: getting better.
+- Kale: starter estimate.
 
 Seed sensor groups:
 
@@ -1078,6 +1101,12 @@ docs/frontend-pages/
 
 Use those files when implementing each route. They define page purpose, required components, TanStack Query hooks, shadcn/ui usage, loading states, empty states, navigation behavior, and acceptance criteria.
 
+The coherence pass in `docs/frontend-pages/10_COHERENCE_REVIEW_AND_FLOW_CONTRACTS.md` is authoritative for cross-page technical details that affect every route: intent-preserving deep links, lifecycle versus derived alert states, list-level prediction summaries, atomic sensor assignment, atomic feedback submission, and Add Crop multi-step writes.
+
+The business analyst review in `docs/frontend-pages/11_BUSINESS_ANALYST_VIABILITY_REVIEW.md` is authoritative for positioning, buyer fit, demo narrative, and commercial awkwardness risks.
+
+The user-friendly product plan in `docs/frontend-pages/12_USER_FRIENDLY_PRODUCT_PLAN.md` is authoritative for visible labels, plain-language copy, progressive disclosure, and reducing user overwhelm.
+
 ## 16. Key UI States
 
 Crop statuses:
@@ -1090,14 +1119,14 @@ Crop statuses:
 - Failed.
 - Archived.
 
-Prediction statuses:
+Harvest estimate statuses:
 
-- Generic baseline.
-- Sensor adjusted.
-- Low confidence.
-- High confidence.
+- Starter estimate.
+- Updated from conditions.
+- Low reliability.
+- High reliability.
 
-Sensor statuses:
+Condition statuses:
 
 - Optimal.
 - Watch.
@@ -1105,17 +1134,17 @@ Sensor statuses:
 - Unavailable.
 - Offline.
 
-Sensor assignment statuses:
+Device connection statuses:
 
-- Assigned.
-- Missing.
-- Ambiguous.
+- Connected.
+- Needs connection.
+- Needs review.
 - Offline.
 
-Feedback statuses:
+Harvest check statuses:
 
 - Not requested.
-- Awaiting feedback.
+- Awaiting harvest check.
 - Submitted.
 - Check again scheduled.
 
@@ -1123,21 +1152,21 @@ Feedback statuses:
 
 The demo should follow a controlled story.
 
-1. Open dashboard and show active crops.
-2. Add a new lettuce crop and assign an available sensor group.
-3. Show the generic prediction.
+1. Open Today and show active crops.
+2. Add a new lettuce crop and connect an available device group.
+3. Show the starter harvest estimate.
 4. Open the crop detail page.
-5. Show how the assigned sensor group explains where readings come from.
-6. Show mocked sensor readings.
-7. Show that the prediction shifted earlier due to good conditions.
-8. Open Sensors and show the crop-to-sensor assignment.
-9. Open calendar and show the updated harvest date.
-10. Open a seeded spinach crop that needs feedback.
-11. Submit feedback that the crop was ready 3 days earlier.
-12. Show the learning confirmation.
-13. Open the Learning page and show improved spinach or lettuce model stats.
-14. Optional: add a custom plant profile to show how unsupported plants start with baseline estimates.
-15. Explain that the backend and ML pipeline can replace the mocked API later without redesigning the journey.
+5. Show how the connected device group explains where readings come from.
+6. Show growing-condition readings.
+7. Show that the expected ready date shifted earlier due to good conditions.
+8. Open Devices & Locations and show the crop-to-device connection.
+9. Open Harvest Plan and show the updated ready date.
+10. Open a seeded spinach crop that needs a harvest check.
+11. Record that the crop was ready 3 days earlier.
+12. Show the harvest-check confirmation.
+13. Open Improvements and show improved spinach or lettuce estimate stats.
+14. Optional: add a custom plant profile to show how unsupported plants start with starter estimates.
+15. Explain that real backend and ML services can replace the mocked API later without redesigning the user journey.
 
 ## 18. Implementation Phases
 
@@ -1152,24 +1181,24 @@ The demo should follow a controlled story.
 - Build mock data.
 - Build mock API functions.
 - Build query keys and query hooks.
-- Build plant profile and sensor assignment mock storage.
+- Build plant profile and device connection mock storage.
 - Build farm location, crop edit/status, and demo reset mock storage.
 
 ### Phase 2: Core Journey
 
-- Build dashboard.
+- Build Today.
 - Build add crop flow.
 - Build crop detail page.
-- Build sensors page.
-- Build harvest calendar.
+- Build Devices & Locations page.
+- Build Harvest Plan.
 - Build edit crop and status action flows.
 
-### Phase 3: Learning Loop
+### Phase 3: Improvement Loop
 
-- Build feedback modal or page.
-- Update mocked learning stats after feedback.
-- Show learning confirmation.
-- Build Learning page.
+- Build harvest-check modal or page.
+- Update mocked improvement stats after harvest checks.
+- Show harvest-check confirmation.
+- Build Improvements page.
 
 ### Phase 4: Polish
 
@@ -1185,18 +1214,18 @@ The demo should follow a controlled story.
 The frontend PoC is successful if:
 
 - A user can create a crop batch.
-- The app displays a generic harvest estimate.
+- The app displays a starter harvest estimate.
 - The user can create a custom plant profile when the plant is not in the catalog.
 - The user can create a farm location when the rack or zone is not listed.
 - The user can edit or archive a crop after creation.
-- The user can assign a sensor group or sensor devices to a crop batch.
-- The app shows mocked sensor data for the crop.
-- Missing sensor types are shown as unavailable instead of breaking charts.
-- The app updates the harvest prediction based on mocked conditions.
-- The app clearly explains why the prediction changed.
-- The user can submit harvest feedback.
-- `Not ready yet` feedback keeps the crop active and schedules another check.
-- The app updates the learning stats after feedback.
+- The user can connect a device group or devices to a crop batch.
+- The app shows growing-condition data for the crop.
+- Missing condition metrics are shown as not tracked instead of breaking charts.
+- The app updates the harvest estimate based on conditions.
+- The app clearly explains why the ready date changed.
+- The user can record harvest checks.
+- `Not ready yet` harvest checks keep the crop active and schedule another check.
+- The app updates improvement stats after harvest checks.
 - Demo data can be reset to the original seeded state.
 - Data reads and writes go through TanStack Query hooks.
 - The UI uses shadcn/ui and Tailwind consistently.
@@ -1238,35 +1267,35 @@ The frontend should keep API calls isolated in `src/lib/mock-api` and query hook
 
 Mitigation:
 
-- Always show prediction confidence.
-- Show sensor-driven prediction shifts.
-- Include learning stats and feedback loop prominently.
+- Always show estimate reliability.
+- Show condition-driven ready-date changes.
+- Include improvement stats and harvest-check loop prominently.
 
-### Risk: The ML Concept Feels Too Abstract
+### Risk: The Improvement Concept Feels Too Abstract
 
 Mitigation:
 
-- Use clear model explanations.
-- Show before and after prediction error.
-- Show plant-specific learning cards.
+- Use clear estimate explanations.
+- Show before and after average miss.
+- Show plant-specific improvement cards.
 
 ### Risk: The Demo Depends Too Much On Manual Explanation
 
 Mitigation:
 
 - Seed demo data that already tells the story.
-- Include one crop that needs feedback.
-- Include one crop with a visible prediction shift.
+- Include one crop that needs a harvest check.
+- Include one crop with a visible ready-date change.
 
 ## 22. Recommended MVP Build Order
 
 1. Define types and mock data.
-2. Build dashboard.
+2. Build Today.
 3. Build crop detail.
 4. Build add crop.
-5. Build feedback flow.
-6. Build learning page.
-7. Build calendar.
+5. Build harvest-check flow.
+6. Build Improvements page.
+7. Build Harvest Plan.
 8. Polish visual hierarchy and demo flow.
 
 If time is short, prioritize Dashboard, Crop Detail, Feedback, and Learning. Those screens best prove the product idea.

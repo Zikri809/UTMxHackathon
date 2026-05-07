@@ -17,6 +17,7 @@ src/components/layout/top-nav.tsx
 src/lib/query/client.ts
 src/lib/query/keys.ts
 src/lib/query/hooks.ts
+src/lib/domain/selectors.ts
 src/lib/mock-api/
 src/lib/mock-ml/
 src/types/
@@ -56,26 +57,57 @@ Default behavior:
 Navigation items:
 
 ```text
-Dashboard -> /dashboard
-Calendar -> /calendar
+Today -> /dashboard
+Harvest Plan -> /calendar
 Crops -> /crops
-Sensors -> /sensors
-Learning -> /learning
+Devices & Locations -> /sensors
+Improvements -> /learning
 ```
 
 Use Lucide icons:
 
-- Dashboard: `LayoutDashboard`
-- Calendar: `CalendarDays`
+- Today: `LayoutDashboard`
+- Harvest Plan: `CalendarDays`
 - Crops: `Sprout`
-- Sensors: `RadioTower` or `Activity`
-- Learning: `BrainCircuit` or `TrendingUp`
+- Devices & Locations: `RadioTower` or `Activity`
+- Improvements: `TrendingUp`
 
 Navigation rules:
 
 - Highlight the active route.
 - Keep "Add Crop" visible as a primary action in the top nav or dashboard header.
 - Page transitions should not reset all mock state because TanStack Query and local storage should hold the app together.
+
+## User-Facing Language Rules
+
+Implementation docs can use technical terms. Visible product copy should use grower-friendly wording:
+
+```text
+prediction -> harvest estimate
+predicted harvest date -> expected ready date
+harvest window -> ready window
+confidence -> reliability
+generic baseline -> starter estimate
+sensor adjusted -> updated from conditions
+sensor group -> device group
+sensor assignment -> connect devices
+feedback -> harvest check
+model learning -> improvements
+```
+
+Do not show these terms in normal UI copy:
+
+- mocked API
+- TanStack Query
+- mutation
+- invalidation
+- ML
+- machine learning
+- sensor provenance
+- generic_baseline
+- model maturity
+
+Technical detail can appear in developer docs and comments. Product screens should lead with what the grower can do next.
 
 ## Providers
 
@@ -115,16 +147,63 @@ src/types/learning.ts
 Core types:
 
 - `CropBatch`
+- `CropBatchSummary`
 - `CreateCropBatchInput`
+- `CreateCropBatchWithDependenciesInput`
 - `FarmLocation`
 - `PlantProfile`
 - `SensorDevice`
 - `SensorGroup`
 - `SensorReading`
 - `HarvestPrediction`
+- `PredictionSummary`
 - `HarvestFeedback`
 - `SubmitHarvestFeedbackInput`
+- `SubmitHarvestFeedbackResult`
 - `ModelLearningStats`
+
+Shared derived state types:
+
+```ts
+type CropHealthState = "healthy" | "watch" | "attention";
+type FeedbackState = "not_requested" | "awaiting_feedback" | "submitted" | "check_again_scheduled";
+type SensorAssignmentState = "assigned" | "missing" | "ambiguous" | "offline";
+type PredictionMode = "generic_baseline" | "sensor_adjusted" | "learned";
+type ModelMaturity = "baseline" | "learning" | "adaptive";
+```
+
+Use `CropBatch.status` only for lifecycle state. Do not store `attention_needed`, `growing_well`, `generic_baseline`, or `check_again_scheduled` as crop statuses. Those are derived display states from sensor health, prediction mode, and feedback metadata.
+
+List pages should use a normalized summary type so they do not run one full prediction query per crop:
+
+```ts
+type PredictionSummary = {
+  batchId: string;
+  genericHarvestDate: string;
+  predictedHarvestDate: string;
+  predictedHarvestWindow: {
+    start: string;
+    end: string;
+  };
+  confidence: number;
+  shiftDays: number;
+  predictionMode: PredictionMode;
+  modelMaturity: ModelMaturity;
+};
+
+type CropBatchSummary = CropBatch & {
+  predictionSummary: PredictionSummary;
+  sensorAssignmentState: SensorAssignmentState;
+  cropHealthState: CropHealthState;
+  feedbackState: FeedbackState;
+};
+```
+
+Farm location identity:
+
+- `farmLocationId` is the stable relationship between crops, sensor groups, and sensor devices.
+- `rack` and `zone` remain display labels and fallback labels.
+- Editing rack or zone labels must not break historical crop or sensor matching.
 
 ## Mock API Contract
 
@@ -140,19 +219,28 @@ getPlantProfiles(): Promise<PlantProfile[]>
 createCustomPlantProfile(input: CreateCustomPlantProfileInput): Promise<PlantProfile>
 updatePlantProfile(input: UpdatePlantProfileInput): Promise<PlantProfile>
 getCropBatches(): Promise<CropBatch[]>
+getCropBatchSummaries(): Promise<CropBatchSummary[]>
 getCropBatch(batchId: string): Promise<CropBatch>
 createCropBatch(input: CreateCropBatchInput): Promise<CropBatch>
+createCropBatchWithDependencies(input: CreateCropBatchWithDependenciesInput): Promise<CreateCropBatchResult>
 updateCropBatch(input: UpdateCropBatchInput): Promise<CropBatch>
 updateCropStatus(input: UpdateCropStatusInput): Promise<CropBatch>
 getSensorDevices(): Promise<SensorDevice[]>
 getSensorGroups(): Promise<SensorGroup[]>
-assignSensorGroupToBatch(input: AssignSensorGroupInput): Promise<SensorGroup>
+assignSensorGroupToBatch(input: AssignSensorGroupInput): Promise<AssignSensorGroupResult>
 getSensorReadings(batchId: string): Promise<SensorReading[]>
 getPrediction(batchId: string): Promise<HarvestPrediction>
-submitHarvestFeedback(input: SubmitHarvestFeedbackInput): Promise<HarvestFeedback>
+getHarvestFeedback(batchId: string): Promise<HarvestFeedback[]>
+submitHarvestFeedback(input: SubmitHarvestFeedbackInput): Promise<SubmitHarvestFeedbackResult>
 getModelLearningStats(): Promise<ModelLearningStats[]>
 resetDemoData(): Promise<void>
 ```
+
+Multi-entity mock commands must be atomic from the UI's point of view:
+
+- `createCropBatchWithDependencies` creates or reuses custom plant and farm location records, then creates the crop. Retrying the same form must not duplicate custom records.
+- `assignSensorGroupToBatch` updates `CropBatch.sensorGroupId` and `SensorGroup.assignedBatchId` together and returns the updated crop, updated group, and previous assignment metadata.
+- `submitHarvestFeedback` returns the saved feedback plus updated crop, prediction, learning stats, and timeline event.
 
 Required query hooks:
 
@@ -164,8 +252,10 @@ usePlantProfiles()
 useCreateCustomPlantProfile()
 useUpdatePlantProfile()
 useCropBatches()
+useCropBatchSummaries()
 useCropBatch(batchId)
 useCreateCropBatch()
+useCreateCropBatchWithDependencies()
 useUpdateCropBatch()
 useUpdateCropStatus()
 useSensorDevices()
@@ -173,6 +263,7 @@ useSensorGroups()
 useAssignSensorGroupToBatch()
 useSensorReadings(batchId)
 useHarvestPrediction(batchId)
+useHarvestFeedback(batchId)
 useSubmitHarvestFeedback()
 useModelLearningStats()
 useResetDemoData()
@@ -184,11 +275,13 @@ Required query keys:
 farmLocations: ["farm-locations"]
 plantProfiles: ["plant-profiles"]
 cropBatches: ["crop-batches"]
+cropBatchSummaries: ["crop-batch-summaries"]
 cropBatch: ["crop-batches", batchId]
 sensorDevices: ["sensor-devices"]
 sensorGroups: ["sensor-groups"]
 sensorReadings: ["sensor-readings", batchId]
 prediction: ["predictions", batchId]
+harvestFeedback: ["harvest-feedback", batchId]
 learningStats: ["learning-stats"]
 ```
 
@@ -198,7 +291,7 @@ learningStats: ["learning-stats"]
 
 - Calls `createFarmLocation`.
 - Invalidates `farmLocations`.
-- Invalidates location selectors on Add Crop and Sensors.
+- Invalidates location selectors on Add Crop and Devices & Locations.
 
 `useUpdateFarmLocation`:
 
@@ -221,27 +314,38 @@ learningStats: ["learning-stats"]
 
 - Calls `createCropBatch`.
 - Invalidates `cropBatches`.
+- Invalidates `cropBatchSummaries`.
 - Invalidates `learningStats` if new crop changes baseline model display.
-- Navigates to `/crops/[batchId]` or shows a success screen with a "View crop" action.
+- Navigates to `/crops/[batchId]` and shows a success toast.
+
+`useCreateCropBatchWithDependencies`:
+
+- Calls `createCropBatchWithDependencies`.
+- Creates or reuses custom plant and farm location records before crop creation.
+- Avoids duplicate custom records on retry.
+- Invalidates `plantProfiles`, `farmLocations`, `cropBatches`, `cropBatchSummaries`, `sensorGroups`, `sensorDevices`, and `learningStats`.
+- Navigates to `/crops/[batchId]` and shows a success toast.
 
 `useUpdateCropBatch`:
 
 - Calls `updateCropBatch`.
-- Invalidates the crop batch, crop list, sensor readings, prediction, and calendar-derived views.
+- Invalidates the crop batch, crop list, crop summaries, sensor readings, prediction, and calendar-derived views.
 
 `useUpdateCropStatus`:
 
 - Calls `updateCropStatus`.
 - Used for archive, cancel, failed, and manual status changes.
-- Invalidates crop batch, crop list, dashboard, calendar, and learning stats.
+- Invalidates crop batch, crop list, crop summaries, dashboard, calendar, and learning stats.
 
 `useAssignSensorGroupToBatch`:
 
 - Calls `assignSensorGroupToBatch`.
+- Treats assignment as an atomic update of the crop and sensor group.
 - Invalidates `sensorGroups`.
 - Invalidates `sensorDevices`.
 - Invalidates `cropBatch(batchId)`.
 - Invalidates `cropBatches`.
+- Invalidates `cropBatchSummaries`.
 - Invalidates `sensorReadings(batchId)`.
 - Invalidates `prediction(batchId)`.
 
@@ -250,9 +354,27 @@ learningStats: ["learning-stats"]
 - Calls `submitHarvestFeedback`.
 - Invalidates `cropBatch(batchId)`.
 - Invalidates `cropBatches`.
+- Invalidates `cropBatchSummaries`.
 - Invalidates `prediction(batchId)`.
+- Invalidates `harvestFeedback(batchId)`.
 - Invalidates `learningStats`.
 - Shows success toast or confirmation panel.
+
+## Shared Selectors
+
+Create shared selectors under `src/lib/domain/selectors.ts` or equivalent:
+
+```ts
+getCropLifecycleState(crop, demoNow)
+getCropHealthState(crop, prediction, readings, assignmentState)
+getFeedbackState(crop, feedbackHistory, demoNow)
+getSensorAssignmentState(crop, sensorGroups, sensorDevices)
+getMissingSensorTypes(crop, plantProfile, sensorGroup, sensorDevices)
+getHarvestWindowSummary(cropOrPrediction)
+getStatusPriority(cropSummary)
+```
+
+Today, Harvest Plan, Crops, Crop Detail, Devices & Locations, and Improvements must use the same selectors directly or consume summaries generated from these selectors.
 
 `useResetDemoData`:
 
@@ -314,21 +436,23 @@ DemoResetDialog
 FarmLocationSelector
 ```
 
+Shared components should accept technical values but render plain labels by default. For example, `PredictionBadge` can receive `predictionMode: "generic_baseline"` but should display "Starter estimate" unless the component is in a developer/debug context.
+
 ## Seed Demo Data
 
-The mock API should start with these crop states:
+The mock API should start with these crop lifecycle and display states:
 
-- Butterhead Lettuce: growing well, prediction 2 days earlier, 76 percent confidence.
-- Thai Basil: attention needed, low light, prediction 2 days later, 61 percent confidence.
-- Spinach: feedback needed, high confidence, used for demo feedback flow.
-- Kale: baseline estimate only, low confidence, new crop.
+- Butterhead Lettuce: lifecycle `growing`, health `healthy`, prediction 2 days earlier, 76 percent confidence.
+- Thai Basil: lifecycle `growing`, health `attention`, low light, prediction 2 days later, 61 percent confidence.
+- Spinach: lifecycle `feedback_needed`, high reliability, used for demo harvest-check flow.
+- Kale: lifecycle `growing`, prediction mode `generic_baseline`, low confidence, new crop.
 
 Seed plant profiles:
 
 - Catalog profiles: Butterhead Lettuce, Thai Basil, Spinach, Kale.
 - Custom profiles should be stored in local storage and returned by `usePlantProfiles`.
 
-Seed sensor groups:
+Seed device groups:
 
 - Rack A / Zone 1: assigned to Butterhead Lettuce.
 - Rack B / Zone 2: assigned to Thai Basil.
@@ -356,6 +480,14 @@ Use an operational dashboard style:
 
 Avoid oversized hero sections. The first screen should be useful immediately.
 
+Use progressive disclosure:
+
+- First layer: what needs action.
+- Second layer: one short reason.
+- Third layer: details such as charts, device groups, exact readings, or estimate quality.
+
+Avoid dense explanatory paragraphs in the main view.
+
 ## Acceptance Criteria
 
 - The app runs with `npm run dev`.
@@ -366,5 +498,5 @@ Avoid oversized hero sections. The first screen should be useful immediately.
 - User-created crops and feedback survive refresh through local storage.
 - Custom plant profiles survive refresh through local storage.
 - Farm locations survive refresh through local storage.
-- Sensor group assignment survives refresh through local storage.
+- Device group connection survives refresh through local storage.
 - Demo reset restores seed crop, plant, location, and sensor data.

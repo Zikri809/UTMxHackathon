@@ -24,21 +24,31 @@ src/components/crops/crops-list-page.tsx
 
 The crops page is the operational inventory of crop batches. It should help the user scan, filter, and open any batch quickly.
 
+It should feel like an inventory board for farm work, not a data table for system internals.
+
 ## Primary User Questions
 
 - What crop batches exist?
-- Which crops are growing, ready soon, completed, or waiting for feedback?
+- Which crops are growing, ready soon, completed, or waiting for a harvest check?
 - Which crops were cancelled, failed, or archived?
 - Which crops belong to a rack or zone?
-- Which crops have missing or ambiguous sensor assignment?
-- Which predictions are low confidence?
+- Which crops need devices connected or reviewed?
+- Which harvest estimates have low reliability?
+
+## User-Friendly UX Rules
+
+- Use `Harvest check` instead of feedback.
+- Use `Expected ready date`, `Ready window`, and `Reliability`.
+- Use `Device connection` instead of sensor assignment.
+- Keep risky lifecycle actions in a More menu with confirmations.
+- Do not show technical IDs unless needed for debugging.
 
 ## Data Dependencies
 
 Use TanStack Query hooks:
 
 ```ts
-const cropBatches = useCropBatches();
+const cropSummaries = useCropBatchSummaries();
 const sensorGroups = useSensorGroups();
 ```
 
@@ -47,8 +57,8 @@ Derived data:
 - Filtered crop list.
 - Status counts.
 - Plant type counts.
-- Crops missing sensor assignment.
-- Sorted list by predicted harvest date or planted date.
+- Crops missing device connection.
+- Sorted list by expected ready date or planted date.
 
 ## Page Layout
 
@@ -63,7 +73,7 @@ Summary chips
   All
   Growing
   Ready Soon
-  Feedback Needed
+  Harvest Check
   Completed
   Cancelled
   Failed
@@ -72,7 +82,7 @@ Summary chips
 Toolbar
   Search
   Plant type filter
-  Sensor assignment filter
+  Device connection filter
   Rack/zone filter
   Sort select
 
@@ -113,22 +123,21 @@ Columns:
 - Variety.
 - Rack/Zone.
 - Planted.
-- Generic harvest.
-- Current prediction.
-- Confidence.
-- Sensor assignment.
+- Starter date.
+- Expected ready date.
+- Reliability.
+- Device connection.
 - Status.
 - Actions.
 
 Actions:
 
 - View.
-- Assign sensors if missing.
-- Submit feedback if status is `feedback_needed`.
-- Edit.
-- Archive.
-- Mark failed.
-- Cancel.
+- Connect devices if missing.
+- Record harvest result if status is `feedback_needed`.
+- More menu with confirmations for Edit, Archive, Mark failed, and Cancel.
+
+Lifecycle-changing actions must show a confirmation dialog and call `useUpdateCropStatus`. Keep destructive or recovery flows available, but make Crop Detail Settings the richer place for editing and explaining these actions.
 
 ## Filters
 
@@ -144,21 +153,21 @@ Filter controls:
 - Status.
 - Plant type.
 - Rack or zone.
-- Sensor assignment: assigned, missing, ambiguous.
+- Device connection: connected, needs connection, needs review.
 - Include archived toggle.
 
 Sort options:
 
-- Predicted harvest date ascending.
+- Expected ready date ascending.
 - Planted date descending.
-- Confidence ascending.
+- Reliability ascending.
 - Status priority.
 
 ## Status Priority
 
 When sorting by status priority:
 
-1. Feedback needed.
+1. Harvest check needed.
 2. Ready soon.
 3. Attention needed if represented separately.
 4. Growing.
@@ -191,15 +200,16 @@ Use shadcn `Alert` with retry.
 
 - `Add Crop` -> `/crops/new`
 - Row click or View action -> `/crops/[batchId]`
-- Assign sensors action -> `/sensors`
-- Feedback action -> `/crops/[batchId]` with feedback section visible, or open `FeedbackModal` if implemented globally
+- Connect devices action -> `/sensors?action=assign&batchId=[batchId]&returnTo=/crops`
+- Record harvest result action -> `/crops/[batchId]?tab=feedback`
 
 ## Acceptance Criteria
 
-- Crops list reads data through `useCropBatches`.
+- Crops list reads data through `useCropBatchSummaries`.
 - List supports search, status filtering, and sorting.
 - User can open any crop detail page.
-- User can identify crops that are missing sensor assignment.
+- User can identify crops that need device connection.
 - User can find archived, cancelled, and failed crops through filters.
-- Status and prediction display match Dashboard and Calendar.
+- Status and harvest estimate display match Today and Harvest Plan.
 - Empty, loading, and error states are implemented.
+- Visible copy avoids ML, prediction-mode, and sensor-assignment jargon.
