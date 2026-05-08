@@ -1,0 +1,16 @@
+export const queryKeys = {
+  farmLocations: ["farm-locations"] as const,
+  plantProfiles: ["plant-profiles"] as const,
+  cropBatches: ["crop-batches"] as const,
+  cropBatchSummaries: ["crop-batch-summaries"] as const,
+  cropBatch: (batchId: string) => ["crop-batches", batchId] as const,
+  sensorDevices: ["sensor-devices"] as const,
+  sensorGroups: ["sensor-groups"] as const,
+  sensorReadingsRoot: ["sensor-readings"] as const,
+  sensorReadings: (batchId: string) => ["sensor-readings", batchId] as const,
+  predictions: ["predictions"] as const,
+  prediction: (batchId: string) => ["predictions", batchId] as const,
+  harvestFeedbackRoot: ["harvest-feedback"] as const,
+  harvestFeedback: (batchId: string) => ["harvest-feedback", batchId] as const,
+  learningStats: ["learning-stats"] as const,
+} as const
