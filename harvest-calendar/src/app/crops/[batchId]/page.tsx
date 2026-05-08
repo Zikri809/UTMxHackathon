@@ -1,10 +1,11 @@
-import { RoutePlaceholder } from "@/components/route-placeholder"
+import { CropDetailPage as CropDetailPageContent } from "@/components/crops/crop-detail-page"
 
-export default function CropDetailPage() {
-  return (
-    <RoutePlaceholder
-      title="Crop Detail"
-      description="Crop status, growing conditions, device connection, and harvest check."
-    />
-  )
+export default async function CropDetailPage({
+  params,
+}: {
+  params: Promise<{ batchId: string }>
+}) {
+  const { batchId } = await params
+
+  return <CropDetailPageContent batchId={batchId} />
 }
