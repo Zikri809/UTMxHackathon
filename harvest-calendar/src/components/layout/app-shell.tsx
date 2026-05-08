@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { Bell, Plus, Search } from "lucide-react"
+import { Bell, Plus, RotateCcw, Search } from "lucide-react"
 
+import { DemoResetDialog } from "@/components/demo-reset-dialog"
 import { Button } from "@/components/ui/button"
 import { SidebarNav } from "./sidebar-nav"
 import { TopNav } from "./top-nav"
@@ -24,6 +25,13 @@ export function AppShell({ children }: AppShellProps) {
             <Button variant="outline" size="icon" aria-label="Notifications">
               <Bell className="size-4" aria-hidden="true" />
             </Button>
+            <DemoResetDialog
+              trigger={
+                <Button variant="outline" size="icon" aria-label="Reset demo data">
+                  <RotateCcw className="size-4" aria-hidden="true" />
+                </Button>
+              }
+            />
             <Button asChild>
               <Link href="/crops/new">
                 <Plus className="size-4" aria-hidden="true" />

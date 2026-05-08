@@ -287,7 +287,7 @@ export function useResetDemoData() {
     mutationFn: resetDemoData,
     onSuccess: () => {
       void queryClient.invalidateQueries()
-      toast.success("Demo data reset.")
+      toast.success("Demo data restored.")
     },
   })
 }

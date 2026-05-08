@@ -888,7 +888,7 @@ export function CropStatusActions({ crop }: { crop: CropBatch }) {
 
   async function setStatus(status: CropBatch["status"]) {
     await updateStatus.mutateAsync({ id: crop.id, status })
-    toast.success("Crop status updated.")
+    toast.success(getStatusToast(status))
   }
 
   return (
@@ -1202,4 +1202,20 @@ function formatTinyDate(value: string) {
 
 function toDateInputValue(date: Date) {
   return date.toISOString().slice(0, 10)
+}
+
+function getStatusToast(status: CropBatch["status"]) {
+  if (status === "archived") {
+    return "Crop archived."
+  }
+
+  if (status === "cancelled") {
+    return "Crop cancelled."
+  }
+
+  if (status === "failed") {
+    return "Crop marked failed."
+  }
+
+  return "Crop status updated."
 }

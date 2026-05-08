@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { CircleCheck, Plus, Sprout } from "lucide-react"
+import { CircleCheck, Plus, RotateCcw, Sprout } from "lucide-react"
 
+import { DemoResetDialog } from "@/components/demo-reset-dialog"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
@@ -71,12 +72,22 @@ export function SidebarNav() {
         </div>
       </div>
       <div className="border-t border-sidebar-border p-4">
-        <Button asChild className="w-full justify-start">
-          <Link href="/crops/new">
-            <Plus className="size-4" aria-hidden="true" />
-            Add Crop
-          </Link>
-        </Button>
+        <div className="grid gap-2">
+          <Button asChild className="w-full justify-start">
+            <Link href="/crops/new">
+              <Plus className="size-4" aria-hidden="true" />
+              Add Crop
+            </Link>
+          </Button>
+          <DemoResetDialog
+            trigger={
+              <Button variant="outline" className="w-full justify-start">
+                <RotateCcw className="size-4" aria-hidden="true" />
+                Reset demo
+              </Button>
+            }
+          />
+        </div>
       </div>
     </aside>
   )

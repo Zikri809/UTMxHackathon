@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, Plus, Sprout } from "lucide-react"
+import { Menu, Plus, RotateCcw, Sprout } from "lucide-react"
 
+import { DemoResetDialog } from "@/components/demo-reset-dialog"
 import { Button } from "@/components/ui/button"
 import {
   Drawer,
@@ -64,6 +65,16 @@ export function TopNav() {
                 )
               })}
             </nav>
+            <div className="border-t border-sidebar-border p-3">
+              <DemoResetDialog
+                trigger={
+                  <Button variant="outline" className="w-full justify-start">
+                    <RotateCcw className="size-4" aria-hidden="true" />
+                    Reset demo
+                  </Button>
+                }
+              />
+            </div>
           </DrawerContent>
         </Drawer>
 

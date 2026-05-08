@@ -8,7 +8,6 @@ import {
   Leaf,
   Plus,
   RadioTower,
-  RotateCcw,
   Sparkles,
   Sprout,
   TrendingUp,
@@ -17,6 +16,7 @@ import {
 
 import { CropCard } from "@/components/crops/crop-card"
 import { ConfidenceMeter } from "@/components/crops/confidence-meter"
+import { DemoResetDialog } from "@/components/demo-reset-dialog"
 import { PageHeader } from "@/components/page-header"
 import { InsightList, type InsightItem } from "@/components/dashboard/insight-list"
 import { StatCard } from "@/components/dashboard/stat-card"
@@ -36,22 +36,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getHarvestWindowSummary, getStatusPriority } from "@/lib/domain/selectors"
 import {
   useCropBatchSummaries,
   useModelLearningStats,
-  useResetDemoData,
   useSensorGroups,
 } from "@/lib/query/hooks"
 import type { CropBatchSummary } from "@/types/crop"
@@ -336,43 +325,6 @@ function DeviceConnections({
         )}
       </CardContent>
     </Card>
-  )
-}
-
-function DemoResetDialog() {
-  const resetDemoData = useResetDemoData()
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <RotateCcw className="size-4" aria-hidden="true" />
-          Reset
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Reset demo data?</DialogTitle>
-          <DialogDescription>
-            This restores the starter crops, locations, device groups, and
-            improvement stats.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-          <DialogClose asChild>
-            <Button
-              onClick={() => resetDemoData.mutate()}
-              disabled={resetDemoData.isPending}
-            >
-              Reset data
-            </Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   )
 }
 

@@ -227,6 +227,12 @@ export function CalendarPage() {
           currentDate={currentDate}
           crops={filteredCrops}
           onSelectCrop={setSelectedCrop}
+          onClearFilters={() => {
+            setPlantFilter("all")
+            setStatusFilter("active")
+            setRackFilter("all")
+            setDeviceFilter("all")
+          }}
         />
       ) : (
         <Card>
@@ -396,12 +402,28 @@ export function CalendarView({
   currentDate,
   crops,
   onSelectCrop,
+  onClearFilters,
 }: {
   view: PlanView
   currentDate: Date
   crops: CropBatchSummary[]
   onSelectCrop: (crop: CropBatchSummary) => void
+  onClearFilters: () => void
 }) {
+  if (!crops.length) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-start gap-3 py-8">
+          <p className="font-medium">No harvest work matches these filters.</p>
+          <p className="max-w-md text-sm text-muted-foreground">
+            Clear filters to return to the full harvest plan.
+          </p>
+          <Button onClick={onClearFilters}>Clear filters</Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
   if (view === "list") {
     return <ListView crops={crops} onSelectCrop={onSelectCrop} />
   }

@@ -475,7 +475,7 @@ export function CropRowActions({ crop }: { crop: CropBatchSummary }) {
     }
 
     await updateCropStatus.mutateAsync({ id: crop.id, status: pendingStatus })
-    toast.success(`${crop.plantName} updated.`)
+    toast.success(getLifecycleToast(crop.plantName, pendingStatus))
     setPendingStatus(undefined)
     setOpen(false)
   }
@@ -824,4 +824,20 @@ const lifecycleActionCopy: Partial<
     confirmLabel: "Cancel crop",
     destructive: true,
   },
+}
+
+function getLifecycleToast(plantName: string, status: CropLifecycleStatus) {
+  if (status === "archived") {
+    return `${plantName} archived.`
+  }
+
+  if (status === "cancelled") {
+    return `${plantName} cancelled.`
+  }
+
+  if (status === "failed") {
+    return `${plantName} marked failed.`
+  }
+
+  return `${plantName} updated.`
 }
