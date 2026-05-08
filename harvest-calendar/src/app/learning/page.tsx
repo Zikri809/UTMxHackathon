@@ -1,10 +1,5 @@
-import { RoutePlaceholder } from "@/components/route-placeholder"
+import { LearningPage } from "@/components/learning/learning-page"
 
-export default function LearningPage() {
-  return (
-    <RoutePlaceholder
-      title="Improvements"
-      description="Harvest checks turned into clearer dates and fewer misses."
-    />
-  )
+export default function LearningRoute() {
+  return <LearningPage />
 }
