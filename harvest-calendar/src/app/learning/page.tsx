@@ -4,7 +4,7 @@ export default function LearningPage() {
   return (
     <RoutePlaceholder
       title="Improvements"
-      description="This page will show how harvest checks improve future estimates over time."
+      description="Harvest checks turned into clearer dates and fewer misses."
     />
   )
 }

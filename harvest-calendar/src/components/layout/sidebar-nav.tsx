@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Plus, Sprout } from "lucide-react"
+import { CircleCheck, Plus, Sprout } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -17,10 +17,10 @@ export function SidebarNav() {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex md:flex-col">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-sidebar-border bg-sidebar/96 text-sidebar-foreground shadow-[1px_0_0_oklch(1_0_0_/_0.55)_inset] md:flex md:flex-col">
       <div className="flex h-16 items-center px-5">
         <Link href="/dashboard" className="flex min-w-0 items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm">
             <Sprout className="size-5" aria-hidden="true" />
           </span>
           <span className="min-w-0">
@@ -28,7 +28,7 @@ export function SidebarNav() {
               Harvest Calendar
             </span>
             <span className="block truncate text-xs text-muted-foreground">
-              Crop planning workspace
+              Morning harvest desk
             </span>
           </span>
         </Link>
@@ -47,7 +47,7 @@ export function SidebarNav() {
               className={cn(
                 "flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
                 active
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-xs"
+                  ? "bg-card text-sidebar-accent-foreground shadow-xs ring-1 ring-sidebar-border"
                   : "text-muted-foreground hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
               )}
             >
@@ -57,6 +57,19 @@ export function SidebarNav() {
           )
         })}
       </nav>
+      <div className="mx-3 mb-3 rounded-lg border border-sidebar-border bg-card/60 p-3">
+        <div className="flex items-start gap-2">
+          <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
+            <CircleCheck className="size-3.5" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="text-xs font-medium">3 harvest checks ready</p>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              Spinach and basil need a quick review.
+            </p>
+          </div>
+        </div>
+      </div>
       <div className="border-t border-sidebar-border p-4">
         <Button asChild className="w-full justify-start">
           <Link href="/crops/new">

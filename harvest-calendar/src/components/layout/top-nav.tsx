@@ -26,7 +26,7 @@ export function TopNav() {
   const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 md:hidden">
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/80 md:hidden">
       <div className="flex h-14 items-center gap-2 px-4">
         <Drawer direction="left">
           <DrawerTrigger asChild>
@@ -34,10 +34,10 @@ export function TopNav() {
               <Menu className="size-4" aria-hidden="true" />
             </Button>
           </DrawerTrigger>
-          <DrawerContent className="w-[86vw] max-w-xs rounded-r-lg">
+          <DrawerContent className="w-[86vw] max-w-xs rounded-r-lg bg-sidebar">
             <DrawerHeader className="text-left">
               <DrawerTitle>Harvest Calendar</DrawerTitle>
-              <DrawerDescription>Crop planning workspace</DrawerDescription>
+              <DrawerDescription>Morning harvest desk</DrawerDescription>
             </DrawerHeader>
             <Separator />
             <nav className="flex flex-col gap-1 p-3" aria-label="Main">
@@ -75,10 +75,10 @@ export function TopNav() {
           <span className="truncate">Harvest Calendar</span>
         </Link>
 
-        <Button asChild size="sm">
+        <Button asChild size="icon-sm" aria-label="Add crop">
           <Link href="/crops/new">
             <Plus className="size-4" aria-hidden="true" />
-            Add Crop
+            <span className="sr-only">Add Crop</span>
           </Link>
         </Button>
       </div>

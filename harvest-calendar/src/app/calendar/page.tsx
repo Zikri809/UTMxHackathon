@@ -4,7 +4,7 @@ export default function CalendarPage() {
   return (
     <RoutePlaceholder
       title="Harvest Plan"
-      description="This page will turn expected ready dates into an operational harvest schedule."
+      description="Expected ready dates arranged as a working harvest schedule."
     />
   )
 }

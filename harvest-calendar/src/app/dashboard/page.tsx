@@ -4,7 +4,7 @@ export default function DashboardPage() {
   return (
     <RoutePlaceholder
       title="Today"
-      description="The main dashboard will show the crops that need attention, upcoming harvest work, and the next best action."
+      description="Ready work, attention crops, and the next best action."
     />
   )
 }

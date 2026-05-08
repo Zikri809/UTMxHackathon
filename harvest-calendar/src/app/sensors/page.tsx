@@ -4,7 +4,7 @@ export default function SensorsPage() {
   return (
     <RoutePlaceholder
       title="Devices & Locations"
-      description="This page will manage device groups, growing locations, and crop connections."
+      description="Device groups, racks, zones, and crop connections in one place."
     />
   )
 }
