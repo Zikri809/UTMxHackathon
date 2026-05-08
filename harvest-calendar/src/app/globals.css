@@ -5,23 +5,23 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.982 0.007 92);
-  --foreground: oklch(0.18 0.012 126);
-  --card: oklch(0.998 0.002 92);
+  --background: oklch(0.977 0.008 82);
+  --foreground: oklch(0.175 0.018 132);
+  --card: oklch(0.997 0.004 86);
   --card-foreground: oklch(0.18 0.012 126);
-  --popover: oklch(0.998 0.002 92);
+  --popover: oklch(0.997 0.004 86);
   --popover-foreground: oklch(0.18 0.012 126);
-  --primary: oklch(0.42 0.115 158);
+  --primary: oklch(0.38 0.105 157);
   --primary-foreground: oklch(0.986 0.018 154);
-  --secondary: oklch(0.944 0.018 91);
-  --secondary-foreground: oklch(0.28 0.028 112);
-  --muted: oklch(0.946 0.013 94);
-  --muted-foreground: oklch(0.49 0.035 118);
-  --accent: oklch(0.93 0.034 157);
-  --accent-foreground: oklch(0.24 0.052 155);
+  --secondary: oklch(0.935 0.024 76);
+  --secondary-foreground: oklch(0.27 0.034 94);
+  --muted: oklch(0.938 0.012 81);
+  --muted-foreground: oklch(0.44 0.031 112);
+  --accent: oklch(0.916 0.039 174);
+  --accent-foreground: oklch(0.21 0.06 171);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.885 0.018 93);
-  --input: oklch(0.885 0.018 93);
+  --border: oklch(0.86 0.019 86);
+  --input: oklch(0.86 0.019 86);
   --ring: oklch(0.63 0.07 156);
   --chart-1: oklch(0.55 0.14 156);
   --chart-2: oklch(0.72 0.16 76);
@@ -29,13 +29,13 @@
   --chart-4: oklch(0.66 0.17 38);
   --chart-5: oklch(0.57 0.18 8);
   --radius: 0.5rem;
-  --sidebar: oklch(0.94 0.018 96);
+  --sidebar: oklch(0.908 0.023 83);
   --sidebar-foreground: oklch(0.19 0.016 126);
   --sidebar-primary: oklch(0.42 0.115 158);
   --sidebar-primary-foreground: oklch(0.986 0.018 154);
-  --sidebar-accent: oklch(0.902 0.03 145);
+  --sidebar-accent: oklch(0.862 0.038 139);
   --sidebar-accent-foreground: oklch(0.22 0.052 153);
-  --sidebar-border: oklch(0.86 0.02 96);
+  --sidebar-border: oklch(0.79 0.027 86);
   --sidebar-ring: oklch(0.63 0.07 156);
 }
 
@@ -125,20 +125,27 @@
     background-image:
       linear-gradient(
         to bottom,
-        oklch(0.965 0.012 95 / 0.85),
-        transparent 22rem
+        oklch(0.936 0.024 78 / 0.8),
+        transparent 19rem
+      ),
+      linear-gradient(
+        115deg,
+        transparent 0 58%,
+        oklch(0.73 0.055 165 / 0.16) 58% 58.5%,
+        transparent 58.5% 100%
       ),
       linear-gradient(
         to right,
-        oklch(0.19 0.01 126 / 0.045) 1px,
+        oklch(0.19 0.01 126 / 0.05) 1px,
         transparent 1px
       ),
       linear-gradient(
         to bottom,
-        oklch(0.19 0.01 126 / 0.04) 1px,
+        oklch(0.19 0.01 126 / 0.035) 1px,
         transparent 1px
       );
     background-size:
+      auto,
       auto,
       32px 32px,
       32px 32px;

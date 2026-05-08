@@ -67,6 +67,7 @@ import {
 } from "@/lib/domain/selectors"
 import {
   useAssignSensorGroupToBatch,
+  useCreateSensorGroup,
   useCreateFarmLocation,
   useCropBatchSummaries,
   useFarmLocations,
@@ -93,12 +94,31 @@ type ConnectDevicesDialogProps = {
   trigger?: React.ReactNode
 }
 
+type AddDeviceGroupDialogProps = {
+  farmLocations: FarmLocation[]
+  trigger: React.ReactNode
+}
+
 const ACTIVE_CROP_STATUSES = ["growing", "ready_soon", "feedback_needed"]
 const methodLabels: Record<GrowingMethod, string> = {
   hydroponic: "Hydroponic",
   soil: "Soil",
   aeroponic: "Aeroponic",
 }
+const sensorTypeOptions: SensorType[] = [
+  "temperature",
+  "humidity",
+  "light",
+  "ph",
+  "ec",
+  "moisture",
+]
+const sensorPresets: Array<{ label: string; types: SensorType[] }> = [
+  { label: "Climate", types: ["temperature", "humidity", "light"] },
+  { label: "Water chemistry", types: ["ph", "ec"] },
+  { label: "Root zone", types: ["moisture", "ph", "temperature"] },
+  { label: "Full rack", types: sensorTypeOptions },
+]
 
 export function SensorsPage() {
   const searchParams = useSearchParams()
@@ -185,21 +205,32 @@ export function SensorsPage() {
         title="Devices & Locations"
         description="See where devices are placed and connect them to crops."
         action={
-          <ConnectDevicesDialog
-            crops={crops}
-            sensorGroups={sensorGroups}
-            sensorDevices={sensorDevices}
-            plantProfiles={plantProfiles}
-            initialBatchId={selectedBatchId}
-            initialOpen={action === "assign"}
-            returnTo={returnTo}
-            trigger={
+          <div className="flex flex-wrap gap-2">
+            <AddDeviceGroupDialog
+              farmLocations={farmLocations}
+              trigger={
+                <Button variant="outline" data-tour-action="add-device-group-opened">
+                  <Plus className="size-4" aria-hidden="true" />
+                  Add device group
+                </Button>
+              }
+            />
+            <ConnectDevicesDialog
+              crops={crops}
+              sensorGroups={sensorGroups}
+              sensorDevices={sensorDevices}
+              plantProfiles={plantProfiles}
+              initialBatchId={selectedBatchId}
+              initialOpen={action === "assign"}
+              returnTo={returnTo}
+              trigger={
               <Button>
                 <PlugZap className="size-4" aria-hidden="true" />
                 Connect devices
               </Button>
-            }
-          />
+              }
+            />
+          </div>
         }
       />
 
@@ -815,6 +846,182 @@ export function ConnectDevicesDialog({
               : isReconnect && !confirmedReconnect
                 ? "Review reconnect"
                 : "Connect devices"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export function AddDeviceGroupDialog({
+  farmLocations,
+  trigger,
+}: AddDeviceGroupDialogProps) {
+  const createSensorGroup = useCreateSensorGroup()
+  const [open, setOpen] = useState(false)
+  const [farmLocationId, setFarmLocationId] = useState(farmLocations[0]?.id ?? "")
+  const [name, setName] = useState("")
+  const [deviceName, setDeviceName] = useState("")
+  const [selectedTypes, setSelectedTypes] = useState<SensorType[]>([
+    "temperature",
+    "humidity",
+    "light",
+  ])
+  const selectedLocation = farmLocations.find((location) => location.id === farmLocationId)
+  const groupName =
+    name.trim() || (selectedLocation ? `${selectedLocation.label} Devices` : "")
+  const generatedDeviceName =
+    deviceName.trim() || (groupName ? `${groupName} Sensor` : "")
+
+  function toggleSensorType(sensorType: SensorType) {
+    setSelectedTypes((current) =>
+      current.includes(sensorType)
+        ? current.filter((item) => item !== sensorType)
+        : [...current, sensorType],
+    )
+  }
+
+  async function onSave() {
+    if (!selectedLocation || !groupName || !selectedTypes.length) {
+      return
+    }
+
+    await createSensorGroup.mutateAsync({
+      name: groupName,
+      deviceName: generatedDeviceName,
+      farmLocationId: selectedLocation.id,
+      rack: selectedLocation.rack,
+      zone: selectedLocation.zone,
+      sensorTypes: selectedTypes,
+      status: "online",
+    })
+    toast.success("Device group added.")
+    setName("")
+    setDeviceName("")
+    setSelectedTypes(["temperature", "humidity", "light"])
+    setOpen(false)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Add device group</DialogTitle>
+          <DialogDescription>
+            Register a device group and choose the sensor metrics it can report.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4">
+          {!farmLocations.length ? (
+            <Alert>
+              <TriangleAlert className="size-4" aria-hidden="true" />
+              <AlertTitle>Add a location first.</AlertTitle>
+              <AlertDescription>
+                Device groups need a rack and zone before they can be connected.
+              </AlertDescription>
+            </Alert>
+          ) : null}
+
+          <label className="grid gap-2 text-sm font-medium">
+            Rack / zone
+            <Select value={farmLocationId} onValueChange={setFarmLocationId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose location" />
+              </SelectTrigger>
+              <SelectContent>
+                {farmLocations.map((location) => (
+                  <SelectItem key={location.id} value={location.id}>
+                    {location.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </label>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="grid gap-2 text-sm font-medium">
+              Device group name
+              <Input
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder={selectedLocation ? `${selectedLocation.label} Devices` : "Rack devices"}
+              />
+            </label>
+            <label className="grid gap-2 text-sm font-medium">
+              Device name
+              <Input
+                value={deviceName}
+                onChange={(event) => setDeviceName(event.target.value)}
+                placeholder={groupName ? `${groupName} Sensor` : "Sensor module"}
+              />
+            </label>
+          </div>
+
+          <div className="grid gap-2">
+            <p className="text-sm font-medium">Sensor package</p>
+            <div className="flex flex-wrap gap-2">
+              {sensorPresets.map((preset) => (
+                <Button
+                  key={preset.label}
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setSelectedTypes(preset.types)}
+                >
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-2">
+            <p className="text-sm font-medium">Metrics tracked</p>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {sensorTypeOptions.map((sensorType) => {
+                const selected = selectedTypes.includes(sensorType)
+
+                return (
+                  <button
+                    key={sensorType}
+                    type="button"
+                    onClick={() => toggleSensorType(sensorType)}
+                    className={cn(
+                      "rounded-md border px-3 py-2 text-left text-sm transition-colors",
+                      selected
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card hover:bg-muted",
+                    )}
+                  >
+                    <span className="font-medium">{formatSensorType(sensorType)}</span>
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {selected ? "Included in this group" : "Not tracked"}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {selectedLocation ? (
+            <div className="grid gap-3 sm:grid-cols-3">
+              <InfoTile label="Rack" value={selectedLocation.rack} />
+              <InfoTile label="Zone" value={selectedLocation.zone} />
+              <InfoTile label="Initial status" value="Online" />
+            </div>
+          ) : null}
+        </div>
+        <DialogFooter showCloseButton>
+          <Button
+            onClick={onSave}
+            disabled={
+              !selectedLocation ||
+              !groupName ||
+              !selectedTypes.length ||
+              createSensorGroup.isPending
+            }
+          >
+            {createSensorGroup.isPending ? "Adding" : "Add device group"}
           </Button>
         </DialogFooter>
       </DialogContent>

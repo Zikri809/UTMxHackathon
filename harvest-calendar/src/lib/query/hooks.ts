@@ -10,6 +10,7 @@ import {
   createCropBatchWithDependencies,
   createCustomPlantProfile,
   createFarmLocation,
+  createSensorGroup,
   getCropBatch,
   getCropBatches,
   getCropBatchSummaries,
@@ -30,6 +31,7 @@ import {
 } from "@/lib/mock-api"
 import type {
   AssignSensorGroupInput,
+  CreateSensorGroupInput,
   CreateCropBatchInput,
   CreateCropBatchWithDependenciesInput,
   CreateCustomPlantProfileInput,
@@ -215,6 +217,19 @@ export function useSensorGroups() {
   return useQuery({
     queryKey: queryKeys.sensorGroups,
     queryFn: getSensorGroups,
+  })
+}
+
+export function useCreateSensorGroup() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: CreateSensorGroupInput) => createSensorGroup(input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.sensorGroups })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.sensorDevices })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.sensorReadingsRoot })
+    },
   })
 }
 

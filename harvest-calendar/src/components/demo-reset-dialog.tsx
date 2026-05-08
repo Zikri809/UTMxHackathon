@@ -2,6 +2,7 @@
 
 import { RotateCcw, TriangleAlert } from "lucide-react"
 
+import { requestDemoTourPrompt } from "@/components/demo-tour-provider"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,21 +17,36 @@ import {
 import { useResetDemoData } from "@/lib/query/hooks"
 
 type DemoResetDialogProps = {
-  trigger?: React.ReactNode
+  ariaLabel?: string
+  className?: string
+  iconOnly?: boolean
+  label?: string
+  size?: React.ComponentProps<typeof Button>["size"]
+  variant?: React.ComponentProps<typeof Button>["variant"]
 }
 
-export function DemoResetDialog({ trigger }: DemoResetDialogProps) {
+export function DemoResetDialog({
+  ariaLabel,
+  className,
+  iconOnly,
+  label = "Reset demo",
+  size = "sm",
+  variant = "outline",
+}: DemoResetDialogProps) {
   const resetDemoData = useResetDemoData()
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        {trigger ?? (
-          <Button variant="outline" size="sm">
-            <RotateCcw className="size-4" aria-hidden="true" />
-            Reset demo
-          </Button>
-        )}
+        <Button
+          variant={variant}
+          size={size}
+          className={className}
+          aria-label={iconOnly ? ariaLabel ?? label : ariaLabel}
+        >
+          <RotateCcw className="size-4" aria-hidden="true" />
+          {iconOnly ? <span className="sr-only">{label}</span> : label}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -51,7 +67,11 @@ export function DemoResetDialog({ trigger }: DemoResetDialogProps) {
           <DialogClose asChild>
             <Button
               variant="destructive"
-              onClick={() => resetDemoData.mutate()}
+              onClick={() =>
+                resetDemoData.mutate(undefined, {
+                  onSuccess: requestDemoTourPrompt,
+                })
+              }
               disabled={resetDemoData.isPending}
             >
               {resetDemoData.isPending ? "Resetting" : "Reset demo"}

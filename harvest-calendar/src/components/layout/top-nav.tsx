@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, Plus, RotateCcw, Sprout } from "lucide-react"
+import { Menu, Plus, Sprout } from "lucide-react"
 
 import { DemoResetDialog } from "@/components/demo-reset-dialog"
 import { Button } from "@/components/ui/button"
@@ -27,8 +27,8 @@ export function TopNav() {
   const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/80 md:hidden">
-      <div className="flex h-14 items-center gap-2 px-4">
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-background/86 backdrop-blur-xl supports-backdrop-filter:bg-background/80 md:hidden">
+      <div className="flex h-16 items-center gap-2 px-4">
         <Drawer direction="left">
           <DrawerTrigger asChild>
             <Button variant="outline" size="icon" aria-label="Open navigation">
@@ -66,14 +66,7 @@ export function TopNav() {
               })}
             </nav>
             <div className="border-t border-sidebar-border p-3">
-              <DemoResetDialog
-                trigger={
-                  <Button variant="outline" className="w-full justify-start">
-                    <RotateCcw className="size-4" aria-hidden="true" />
-                    Reset demo
-                  </Button>
-                }
-              />
+              <DemoResetDialog className="w-full justify-start" />
             </div>
           </DrawerContent>
         </Drawer>
@@ -82,8 +75,15 @@ export function TopNav() {
           href="/dashboard"
           className="flex min-w-0 flex-1 items-center gap-2 font-heading font-semibold"
         >
-          <Sprout className="size-5 shrink-0 text-primary" aria-hidden="true" />
-          <span className="truncate">Harvest Calendar</span>
+          <span className="grid size-8 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
+            <Sprout className="size-4" aria-hidden="true" />
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate leading-tight">Harvest Calendar</span>
+            <span className="block truncate font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+              Harvest ops
+            </span>
+          </span>
         </Link>
 
         <Button asChild size="icon-sm" aria-label="Add crop">

@@ -301,7 +301,11 @@ export function CropDetailPage({ batchId }: CropDetailPageProps) {
               />
             ))}
           </div>
-          <SensorTrendChart readings={readings} connectedDevices={connectedDevices} />
+          <SensorTrendChart
+            readings={readings}
+            connectedDevices={connectedDevices}
+            plantProfile={plantProfile}
+          />
         </TabsContent>
 
         <TabsContent value="devices" className="space-y-4">
@@ -501,12 +505,26 @@ export function SensorMetricCard({
 export function SensorTrendChart({
   readings,
   connectedDevices,
+  plantProfile,
 }: {
   readings: SensorReading[]
   connectedDevices: SensorDevice[]
+  plantProfile?: PlantProfile
 }) {
   const availableTypes = getAvailableSensorTypes(connectedDevices)
+  const latestReading = readings[0]
+  const firstAttentionMetric = metricDefinitions.find((metric) => {
+    const value = latestReading?.[metric.readingKey]
+    const idealRange = plantProfile?.idealRanges[metric.rangeKey]
+
+    if (!availableTypes.has(metric.type) || typeof value !== "number" || !idealRange) {
+      return false
+    }
+
+    return value < idealRange.min || value > idealRange.max
+  })
   const firstTrackedMetric =
+    firstAttentionMetric ??
     metricDefinitions.find((metric) => availableTypes.has(metric.type) && readings.some((reading) => reading[metric.readingKey] !== undefined)) ??
     metricDefinitions.find((metric) => readings.some((reading) => reading[metric.readingKey] !== undefined))
   const [metricType, setMetricType] = useState<SensorType>(firstTrackedMetric?.type ?? "temperature")
@@ -520,6 +538,10 @@ export function SensorTrendChart({
 
     return source
       .filter((reading) => reading[metric.readingKey] !== undefined)
+      .sort(
+        (left, right) =>
+          new Date(left.timestamp).getTime() - new Date(right.timestamp).getTime(),
+      )
       .map((reading) => ({
         time: formatTinyDate(reading.timestamp),
         value: Number(reading[metric.readingKey]),
@@ -542,7 +564,7 @@ export function SensorTrendChart({
     <Card>
       <CardHeader className="border-b">
         <CardTitle>Condition trend</CardTitle>
-        <CardDescription>Compact view of the latest tracked condition.</CardDescription>
+        <CardDescription>Seven-day signal from the connected device history.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap gap-2">
@@ -569,8 +591,8 @@ export function SensorTrendChart({
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2}
+                stroke="var(--primary)"
+                strokeWidth={3}
                 dot={{ r: 3 }}
               />
             </LineChart>
@@ -695,7 +717,7 @@ export function FeedbackModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button data-tour-action="harvest-feedback-opened">
           <ClipboardCheck className="size-4" aria-hidden="true" />
           Record harvest result
         </Button>

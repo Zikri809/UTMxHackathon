@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { CircleCheck, Plus, RotateCcw, Sprout } from "lucide-react"
+import { CircleCheck, Plus, Sprout } from "lucide-react"
 
 import { DemoResetDialog } from "@/components/demo-reset-dialog"
 import { Button } from "@/components/ui/button"
@@ -19,23 +19,24 @@ export function SidebarNav() {
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-sidebar-border bg-sidebar/96 text-sidebar-foreground shadow-[1px_0_0_oklch(1_0_0_/_0.55)_inset] md:flex md:flex-col">
-      <div className="flex h-16 items-center px-5">
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-[linear-gradient(to_right,transparent,oklch(0.18_0.018_132_/_0.035))]" />
+      <div className="flex h-[4.5rem] items-center px-5">
         <Link href="/dashboard" className="flex min-w-0 items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-[0_10px_24px_oklch(0.38_0.105_157_/_0.22)]">
             <Sprout className="size-5" aria-hidden="true" />
           </span>
           <span className="min-w-0">
-            <span className="block font-heading text-base font-semibold">
+            <span className="block font-heading text-base font-semibold leading-tight">
               Harvest Calendar
             </span>
-            <span className="block truncate text-xs text-muted-foreground">
-              Morning harvest desk
+            <span className="mt-0.5 block truncate font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              Harvest ops
             </span>
           </span>
         </Link>
       </div>
       <Separator />
-      <nav className="flex flex-1 flex-col gap-1 px-3 py-4" aria-label="Main">
+      <nav className="flex flex-1 flex-col gap-1.5 px-3 py-4" aria-label="Main">
         {mainNavItems.map((item) => {
           const Icon = item.icon
           const active = isActiveRoute(pathname, item.href)
@@ -46,21 +47,29 @@ export function SidebarNav() {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
+                "relative flex h-11 items-center gap-3 rounded-md px-3 text-sm font-medium transition-all",
                 active
-                  ? "bg-card text-sidebar-accent-foreground shadow-xs ring-1 ring-sidebar-border"
+                  ? "bg-card/88 text-sidebar-accent-foreground shadow-[0_1px_0_oklch(1_0_0_/_0.7)_inset,0_8px_20px_oklch(0.21_0.024_110_/_0.08)] ring-1 ring-sidebar-border before:absolute before:left-1 before:top-2 before:h-7 before:w-1 before:rounded-full before:bg-primary"
                   : "text-muted-foreground hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
               )}
             >
-              <Icon className="size-4" aria-hidden="true" />
+              <Icon className={cn("size-4", active && "ml-2")} aria-hidden="true" />
               <span>{item.label}</span>
             </Link>
           )
         })}
       </nav>
-      <div className="mx-3 mb-3 rounded-lg border border-sidebar-border bg-card/60 p-3">
+      <div className="mx-3 mb-3 rounded-lg border border-sidebar-border bg-card/70 p-3 shadow-[0_1px_0_oklch(1_0_0_/_0.62)_inset]">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Shift brief
+          </span>
+          <span className="rounded-sm bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+            07:30
+          </span>
+        </div>
         <div className="flex items-start gap-2">
-          <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
+          <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200">
             <CircleCheck className="size-3.5" aria-hidden="true" />
           </span>
           <div>
@@ -79,14 +88,7 @@ export function SidebarNav() {
               Add Crop
             </Link>
           </Button>
-          <DemoResetDialog
-            trigger={
-              <Button variant="outline" className="w-full justify-start">
-                <RotateCcw className="size-4" aria-hidden="true" />
-                Reset demo
-              </Button>
-            }
-          />
+          <DemoResetDialog className="w-full justify-start" />
         </div>
       </div>
     </aside>

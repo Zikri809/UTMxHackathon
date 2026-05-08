@@ -12,8 +12,11 @@ export async function getSensorReadings(batchId: string): Promise<SensorReading[
   const sensorGroupId = cropBatch?.sensorGroupId
 
   return withMockDelay(
-    state.sensorReadings.filter(
-      (reading) => reading.batchId === batchId || reading.sensorGroupId === sensorGroupId,
-    ),
+    state.sensorReadings
+      .filter((reading) => reading.batchId === batchId || reading.sensorGroupId === sensorGroupId)
+      .sort(
+        (left, right) =>
+          new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime(),
+      ),
   )
 }

@@ -1,16 +1,17 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import {
   Archive,
   ArrowUpDown,
   ClipboardCheck,
-  Eye,
   MoreHorizontal,
   Plus,
   RadioTower,
   Search,
+  SlidersHorizontal,
   TriangleAlert,
   XCircle,
 } from "lucide-react"
@@ -383,6 +384,8 @@ export function CropFilters({
 }
 
 export function CropTable({ crops }: { crops: CropBatchSummary[] }) {
+  const router = useRouter()
+
   return (
     <Card>
       <Table>
@@ -405,14 +408,25 @@ export function CropTable({ crops }: { crops: CropBatchSummary[] }) {
             const windowSummary = getHarvestWindowSummary(crop)
 
             return (
-              <TableRow key={crop.id}>
+              <TableRow
+                key={crop.id}
+                tabIndex={0}
+                role="link"
+                data-tour-action={
+                  crop.id === "batch-thai-basil" ? "thai-basil-opened" : "crop-row-opened"
+                }
+                aria-label={`Open ${crop.plantName} details`}
+                className="cursor-pointer focus-visible:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                onClick={() => router.push(`/crops/${crop.id}`)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault()
+                    router.push(`/crops/${crop.id}`)
+                  }
+                }}
+              >
                 <TableCell>
-                  <Link
-                    href={`/crops/${crop.id}`}
-                    className="font-medium hover:underline"
-                  >
-                    {crop.plantName}
-                  </Link>
+                  <span className="font-medium">{crop.plantName}</span>
                   <div className="mt-1">
                     <PredictionBadge mode={crop.predictionSummary.predictionMode} />
                   </div>
@@ -447,7 +461,7 @@ export function CropTable({ crops }: { crops: CropBatchSummary[] }) {
                     </span>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell onClick={(event) => event.stopPropagation()}>
                   <CropRowActions crop={crop} />
                 </TableCell>
               </TableRow>
@@ -482,11 +496,6 @@ export function CropRowActions({ crop }: { crop: CropBatchSummary }) {
 
   return (
     <div className="flex justify-end gap-1">
-      <Button asChild size="icon-sm" variant="ghost" aria-label={`View ${crop.plantName}`}>
-        <Link href={`/crops/${crop.id}`}>
-          <Eye className="size-4" aria-hidden="true" />
-        </Link>
-      </Button>
       {needsDevices ? (
         <Button
           asChild
@@ -551,7 +560,7 @@ export function CropRowActions({ crop }: { crop: CropBatchSummary }) {
             <div className="grid gap-2">
               <Button asChild variant="outline" className="justify-start">
                 <Link href={`/crops/${crop.id}?tab=settings`}>
-                  <Eye className="size-4" aria-hidden="true" />
+                  <SlidersHorizontal className="size-4" aria-hidden="true" />
                   Edit in Crop Detail
                 </Link>
               </Button>

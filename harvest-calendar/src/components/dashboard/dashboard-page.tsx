@@ -150,7 +150,16 @@ export function DashboardPage() {
         secondaryAction={<DemoResetDialog />}
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+      <OperationsBrief
+        activeCount={activeCrops.length}
+        readySoonCount={readySoon.length}
+        harvestChecksCount={harvestChecks.length}
+        attentionCount={attentionCrops.length}
+        reliability={averageReliability}
+        nextCrop={upcomingCrops[0]}
+      />
+
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Active Batches"
           value={String(activeCrops.length)}
@@ -227,6 +236,95 @@ export function DashboardPage() {
         emptyText="No urgent crop attention needed."
       />
     </div>
+  )
+}
+
+function OperationsBrief({
+  activeCount,
+  readySoonCount,
+  harvestChecksCount,
+  attentionCount,
+  reliability,
+  nextCrop,
+}: {
+  activeCount: number
+  readySoonCount: number
+  harvestChecksCount: number
+  attentionCount: number
+  reliability: number
+  nextCrop?: CropBatchSummary
+}) {
+  const rhythm = [
+    { label: "Active", value: activeCount },
+    { label: "Ready", value: readySoonCount },
+    { label: "Checks", value: harvestChecksCount },
+    { label: "Watch", value: attentionCount },
+  ]
+
+  return (
+    <section className="overflow-hidden rounded-lg border border-border/80 bg-[linear-gradient(135deg,oklch(0.997_0.004_86_/_0.98),oklch(0.92_0.034_157_/_0.7))] shadow-[0_1px_0_oklch(1_0_0_/_0.7)_inset,0_18px_42px_oklch(0.2_0.03_110_/_0.08)]">
+      <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_21rem]">
+        <div className="relative p-5 sm:p-6">
+          <div className="absolute inset-y-5 left-0 w-1 bg-primary" />
+          <div className="pl-3">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Operations pulse
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-4">
+              {rhythm.map((item) => (
+                <div key={item.label} className="border-l border-border/80 pl-3">
+                  <p className="font-heading text-3xl font-semibold leading-none">
+                    {item.value}
+                  </p>
+                  <p className="mt-1 text-xs font-medium text-muted-foreground">
+                    {item.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 h-2 overflow-hidden rounded-full bg-background/80 ring-1 ring-border/70">
+              <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${Math.min(reliability, 100)}%` }}
+              />
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {reliability}% average reliability across active crop batches.
+            </p>
+          </div>
+        </div>
+        <div className="border-t border-border/70 bg-foreground/[0.035] p-5 lg:border-l lg:border-t-0">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Next ready window
+          </p>
+          {nextCrop ? (
+            <div className="mt-4">
+              <p className="font-heading text-2xl font-semibold">
+                {nextCrop.plantName}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {nextCrop.rack} / {nextCrop.zone}
+              </p>
+              <div className="mt-5 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground">Expected</p>
+                  <p className="font-medium">
+                    {formatDate(nextCrop.predictedHarvestDate)}
+                  </p>
+                </div>
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/crops/${nextCrop.id}`}>Open crop</Link>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-muted-foreground">
+              No active harvest window is scheduled.
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
   )
 }
 

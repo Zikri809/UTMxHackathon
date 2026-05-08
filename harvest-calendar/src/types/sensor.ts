@@ -49,6 +49,21 @@ export type AssignSensorGroupInput = {
   sensorGroupId: string
 }
 
+export type CreateSensorGroupInput = {
+  name: string
+  deviceName?: string
+  farmLocationId?: string
+  rack: string
+  zone: string
+  sensorTypes: SensorType[]
+  status?: SensorDeviceStatus
+}
+
+export type CreateSensorGroupResult = {
+  sensorGroup: SensorGroup
+  sensorDevices: SensorDevice[]
+}
+
 export type AssignSensorGroupResult = {
   cropBatch: CropBatch
   sensorGroup: SensorGroup

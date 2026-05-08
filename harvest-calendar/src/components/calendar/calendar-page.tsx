@@ -187,7 +187,7 @@ export function CalendarPage() {
           <CalendarDays className="size-4" aria-hidden="true" />
           <AlertTitle>{focusedCrop.plantName} is selected.</AlertTitle>
           <AlertDescription>
-            Expected ready date {formatDate(focusedCrop.predictionSummary.predictedHarvestDate)} · Reliability{" "}
+            Expected ready date {formatDate(focusedCrop.predictionSummary.predictedHarvestDate)} / Reliability{" "}
             {focusedCrop.predictionSummary.confidence}%.
           </AlertDescription>
           <AlertAction>
@@ -646,7 +646,7 @@ export function CropSummaryDrawer({
         <DrawerHeader>
           <DrawerTitle>{crop.plantName}</DrawerTitle>
           <DrawerDescription>
-            {crop.rack} / {crop.zone} · {crop.plantCount} plants
+            {crop.rack} / {crop.zone} / {crop.plantCount} plants
           </DrawerDescription>
         </DrawerHeader>
         <div className="space-y-4 overflow-y-auto px-4 pb-4">

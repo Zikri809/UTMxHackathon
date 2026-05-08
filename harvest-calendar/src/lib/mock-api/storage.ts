@@ -19,7 +19,7 @@ export type DemoDataState = {
   timelineEvents: CropTimelineEvent[]
 }
 
-const STORAGE_KEY = "harvest-calendar-demo-data:v1"
+const STORAGE_KEY = "harvest-calendar-demo-data:v2"
 const DELAY_MS = 120
 
 let memoryState: DemoDataState | undefined
@@ -275,24 +275,73 @@ function createSeedDemoData(): DemoDataState {
   ]
 
   const sensorReadings: SensorReading[] = [
-    createReading("reading-butterhead", "sensor-a-climate", "group-rack-a-zone-1", "batch-butterhead-lettuce", farmLocations[0], today, {
-      temperatureC: 20.4,
-      humidityPercent: 64,
-      ph: 6.2,
-      ec: 1.5,
-      lightHours: 14.5,
+    ...createReadingSeries({
+      idPrefix: "reading-butterhead",
+      sensorId: "sensor-a-climate",
+      sensorGroupId: "group-rack-a-zone-1",
+      batchId: "batch-butterhead-lettuce",
+      location: farmLocations[0],
+      startDate: today,
+      metricsByDay: [
+        { temperatureC: 20.4, humidityPercent: 64, ph: 6.2, ec: 1.5, lightHours: 14.6 },
+        { temperatureC: 20.1, humidityPercent: 63, ph: 6.1, ec: 1.5, lightHours: 14.2 },
+        { temperatureC: 19.8, humidityPercent: 65, ph: 6.2, ec: 1.4, lightHours: 13.9 },
+        { temperatureC: 20.7, humidityPercent: 66, ph: 6.3, ec: 1.6, lightHours: 14.8 },
+        { temperatureC: 21.2, humidityPercent: 64, ph: 6.2, ec: 1.6, lightHours: 15.1 },
+        { temperatureC: 20.6, humidityPercent: 62, ph: 6.1, ec: 1.5, lightHours: 14.7 },
+        { temperatureC: 19.9, humidityPercent: 63, ph: 6.2, ec: 1.4, lightHours: 14.1 },
+      ],
     }),
-    createReading("reading-thai-basil", "sensor-b-light", "group-rack-b-zone-2", "batch-thai-basil", farmLocations[1], today, {
-      temperatureC: 24.6,
-      humidityPercent: 58,
-      lightHours: 9.2,
+    ...createReadingSeries({
+      idPrefix: "reading-thai-basil",
+      sensorId: "sensor-b-light",
+      sensorGroupId: "group-rack-b-zone-2",
+      batchId: "batch-thai-basil",
+      location: farmLocations[1],
+      startDate: today,
+      metricsByDay: [
+        { temperatureC: 24.6, humidityPercent: 58, lightHours: 9.2 },
+        { temperatureC: 24.1, humidityPercent: 57, lightHours: 9.6 },
+        { temperatureC: 23.8, humidityPercent: 56, lightHours: 10.1 },
+        { temperatureC: 24.8, humidityPercent: 59, lightHours: 10.4 },
+        { temperatureC: 25.3, humidityPercent: 61, lightHours: 11.2 },
+        { temperatureC: 24.9, humidityPercent: 60, lightHours: 12.5 },
+        { temperatureC: 24.2, humidityPercent: 58, lightHours: 13.1 },
+      ],
     }),
-    createReading("reading-spinach", "sensor-c-climate", "group-rack-c-zone-1", "batch-spinach-harvest-check", farmLocations[2], today, {
-      temperatureC: 18.1,
-      humidityPercent: 67,
-      ph: 6.4,
-      ec: 1.7,
-      lightHours: 12.3,
+    ...createReadingSeries({
+      idPrefix: "reading-spinach",
+      sensorId: "sensor-c-climate",
+      sensorGroupId: "group-rack-c-zone-1",
+      batchId: "batch-spinach-harvest-check",
+      location: farmLocations[2],
+      startDate: today,
+      metricsByDay: [
+        { temperatureC: 18.1, humidityPercent: 67, ph: 6.4, ec: 1.7, lightHours: 12.3 },
+        { temperatureC: 17.8, humidityPercent: 68, ph: 6.4, ec: 1.8, lightHours: 12.1 },
+        { temperatureC: 17.3, humidityPercent: 69, ph: 6.5, ec: 1.8, lightHours: 11.8 },
+        { temperatureC: 16.9, humidityPercent: 70, ph: 6.5, ec: 1.9, lightHours: 11.4 },
+        { temperatureC: 16.4, humidityPercent: 71, ph: 6.6, ec: 1.9, lightHours: 11.0 },
+        { temperatureC: 16.1, humidityPercent: 72, ph: 6.7, ec: 2.0, lightHours: 10.8 },
+        { temperatureC: 15.9, humidityPercent: 72, ph: 6.7, ec: 2.0, lightHours: 10.5 },
+      ],
+    }),
+    ...createReadingSeries({
+      idPrefix: "reading-kale-available",
+      sensorId: "sensor-d-water",
+      sensorGroupId: "group-rack-d-zone-3",
+      batchId: undefined,
+      location: farmLocations[3],
+      startDate: today,
+      metricsByDay: [
+        { temperatureC: 27.8, humidityPercent: 47, ph: 7.4, moisturePercent: 39 },
+        { temperatureC: 27.1, humidityPercent: 48, ph: 7.3, moisturePercent: 41 },
+        { temperatureC: 26.4, humidityPercent: 49, ph: 7.2, moisturePercent: 43 },
+        { temperatureC: 25.9, humidityPercent: 50, ph: 7.2, moisturePercent: 44 },
+        { temperatureC: 24.8, humidityPercent: 52, ph: 7.1, moisturePercent: 47 },
+        { temperatureC: 23.6, humidityPercent: 54, ph: 7.0, moisturePercent: 49 },
+        { temperatureC: 22.9, humidityPercent: 55, ph: 6.9, moisturePercent: 50 },
+      ],
     }),
   ]
 
@@ -491,7 +540,7 @@ function createReading(
   id: string,
   sensorId: string,
   sensorGroupId: string,
-  batchId: string,
+  batchId: string | undefined,
   location: FarmLocation,
   timestamp: Date,
   metrics: Pick<
@@ -509,6 +558,33 @@ function createReading(
     timestamp: timestamp.toISOString(),
     ...metrics,
   }
+}
+
+function createReadingSeries(input: {
+  idPrefix: string
+  sensorId: string
+  sensorGroupId: string
+  batchId?: string
+  location: FarmLocation
+  startDate: Date
+  metricsByDay: Array<
+    Pick<
+      SensorReading,
+      "temperatureC" | "humidityPercent" | "ph" | "ec" | "lightHours" | "moisturePercent"
+    >
+  >
+}) {
+  return input.metricsByDay.map((metrics, index) =>
+    createReading(
+      `${input.idPrefix}-${index}`,
+      input.sensorId,
+      input.sensorGroupId,
+      input.batchId,
+      input.location,
+      addDays(input.startDate, -index),
+      metrics,
+    ),
+  )
 }
 
 function createPrediction(

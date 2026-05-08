@@ -40,11 +40,22 @@ export function CropCard({ crop }: CropCardProps) {
   const needsDevices = crop.sensorAssignmentState !== "assigned"
 
   return (
-    <Card className="transition-colors hover:bg-accent/40">
-      <CardContent className="space-y-4">
+    <Card className="relative transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:bg-card">
+      <div
+        className={cn(
+          "absolute inset-y-0 left-0 w-1.5",
+          crop.cropHealthState === "healthy" && "bg-emerald-500",
+          crop.cropHealthState === "watch" && "bg-amber-500",
+          crop.cropHealthState === "attention" && "bg-orange-500",
+        )}
+      />
+      <CardContent className="space-y-4 pl-7">
         <div className="flex flex-col gap-3 2xl:flex-row 2xl:items-start 2xl:justify-between">
           <Link href={`/crops/${crop.id}`} className="min-w-0">
-            <p className="font-heading text-lg font-semibold leading-tight">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              {crop.rack} / {crop.zone}
+            </p>
+            <p className="mt-1 font-heading text-xl font-semibold leading-tight">
               {crop.plantName}
               {crop.variety ? (
                 <span className="font-sans text-sm font-medium text-muted-foreground">
@@ -54,10 +65,7 @@ export function CropCard({ crop }: CropCardProps) {
               ) : null}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <MapPin className="size-3.5" aria-hidden="true" />
-                {crop.rack} / {crop.zone}
-              </span>
+              <MapPin className="size-3.5" aria-hidden="true" />
               <span>Planted {formatDate(crop.plantedAt)}</span>
             </div>
           </Link>
@@ -83,10 +91,6 @@ export function CropCard({ crop }: CropCardProps) {
             <RadioTower className="size-3.5" aria-hidden="true" />
             {getSensorAssignmentLabel(crop.sensorAssignmentState)}
           </Badge>
-          <Badge variant="outline">
-            {formatDate(crop.genericHarvestDate)} starter date
-          </Badge>
-          <Badge variant="outline">{formatShift(dateShift)}</Badge>
         </div>
 
         <HarvestWindow
@@ -94,6 +98,21 @@ export function CropCard({ crop }: CropCardProps) {
           windowLabel={windowSummary.label}
         />
         <ConfidenceMeter value={crop.predictionSummary.confidence} />
+
+        <div className="grid grid-cols-3 gap-2 rounded-md border border-border/70 bg-muted/35 p-2 text-xs">
+          <div>
+            <p className="text-muted-foreground">Starter</p>
+            <p className="font-medium">{formatDate(crop.genericHarvestDate)}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Shift</p>
+            <p className="font-medium">{formatShift(dateShift)}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Plants</p>
+            <p className="font-medium">{crop.plantCount}</p>
+          </div>
+        </div>
 
         <div className="flex flex-wrap items-center gap-2 pt-1">
           {needsHarvestResult ? (
@@ -135,7 +154,7 @@ function formatDate(value: string) {
 
 function formatShift(days: number) {
   if (days === 0) {
-    return "Date unchanged"
+    return "Unchanged"
   }
 
   return `${Math.abs(days)} days ${days > 0 ? "later" : "earlier"}`

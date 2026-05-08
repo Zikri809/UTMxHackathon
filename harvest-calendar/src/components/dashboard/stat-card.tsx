@@ -40,14 +40,24 @@ export function StatCard({
   progress,
 }: StatCardProps) {
   return (
-    <Card size="sm">
-      <CardContent className="space-y-3">
+    <Card size="sm" className="relative min-h-36 overflow-hidden">
+      <div
+        className={cn(
+          "absolute inset-x-0 top-0 h-1",
+          tone === "green" && "bg-emerald-500",
+          tone === "amber" && "bg-amber-500",
+          tone === "orange" && "bg-orange-500",
+          tone === "blue" && "bg-sky-500",
+          tone === "slate" && "bg-slate-500",
+        )}
+      />
+      <CardContent className="relative space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-medium text-muted-foreground">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {label}
             </p>
-            <p className="mt-2 font-heading text-xl font-semibold">
+            <p className="mt-2 font-heading text-3xl font-semibold leading-none">
               {value}
             </p>
           </div>
