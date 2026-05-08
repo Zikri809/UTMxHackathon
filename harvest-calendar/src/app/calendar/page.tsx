@@ -1,10 +1,14 @@
-import { RoutePlaceholder } from "@/components/route-placeholder"
+import { Suspense } from "react"
+
+import {
+  CalendarPage as CalendarPageContent,
+  CalendarPageSkeleton,
+} from "@/components/calendar/calendar-page"
 
 export default function CalendarPage() {
   return (
-    <RoutePlaceholder
-      title="Harvest Plan"
-      description="Expected ready dates arranged as a working harvest schedule."
-    />
+    <Suspense fallback={<CalendarPageSkeleton />}>
+      <CalendarPageContent />
+    </Suspense>
   )
 }
