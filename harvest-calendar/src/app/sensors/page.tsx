@@ -1,10 +1,12 @@
-import { RoutePlaceholder } from "@/components/route-placeholder"
+import { Suspense } from "react"
+
+import { SensorsPage as SensorsPageContent } from "@/components/sensors/sensors-page"
+import { SensorsPageSkeleton } from "@/components/sensors/sensors-page"
 
 export default function SensorsPage() {
   return (
-    <RoutePlaceholder
-      title="Devices & Locations"
-      description="Device groups, racks, zones, and crop connections in one place."
-    />
+    <Suspense fallback={<SensorsPageSkeleton />}>
+      <SensorsPageContent />
+    </Suspense>
   )
 }
