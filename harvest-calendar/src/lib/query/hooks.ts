@@ -143,7 +143,7 @@ export function useCreateCropBatch() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.sensorGroups })
       void queryClient.invalidateQueries({ queryKey: queryKeys.sensorDevices })
       void queryClient.invalidateQueries({ queryKey: queryKeys.learningStats })
-      toast.success(`${cropBatch.plantName} was added.`)
+      toast.success("Crop added with a starter harvest estimate.")
       router.push(`/crops/${cropBatch.id}`)
     },
   })
@@ -163,7 +163,17 @@ export function useCreateCropBatchWithDependencies() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.sensorGroups })
       void queryClient.invalidateQueries({ queryKey: queryKeys.sensorDevices })
       void queryClient.invalidateQueries({ queryKey: queryKeys.learningStats })
-      toast.success(`${cropBatch.plantName} was added.`)
+      toast.success("Crop added with a starter harvest estimate.", {
+        action: cropBatch.sensorGroupId
+          ? undefined
+          : {
+              label: "Connect devices",
+              onClick: () =>
+                router.push(
+                  `/sensors?action=assign&batchId=${cropBatch.id}&returnTo=/crops/${cropBatch.id}`,
+                ),
+            },
+      })
       router.push(`/crops/${cropBatch.id}`)
     },
   })
