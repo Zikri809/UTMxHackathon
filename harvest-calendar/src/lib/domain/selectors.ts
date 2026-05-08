@@ -248,11 +248,15 @@ function getFallbackAssignmentState(
 ): SensorAssignmentState {
   const matchingGroups = getMatchingSensorGroups(crop, sensorGroups)
 
-  if (matchingGroups.length === 0) {
+  const assignedMatchingGroups = matchingGroups.filter(
+    (group) => group.assignedBatchId === crop.id,
+  )
+
+  if (assignedMatchingGroups.length === 0) {
     return "missing"
   }
 
-  if (matchingGroups.length > 1) {
+  if (assignedMatchingGroups.length > 1) {
     return "ambiguous"
   }
 
@@ -260,7 +264,9 @@ function getFallbackAssignmentState(
 }
 
 function getFallbackSensorGroup(crop: CropBatch, sensorGroups: SensorGroup[]) {
-  const matchingGroups = getMatchingSensorGroups(crop, sensorGroups)
+  const matchingGroups = getMatchingSensorGroups(crop, sensorGroups).filter(
+    (group) => group.assignedBatchId === crop.id,
+  )
 
   return matchingGroups.length === 1 ? matchingGroups[0] : undefined
 }

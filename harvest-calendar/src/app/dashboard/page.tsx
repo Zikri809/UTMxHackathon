@@ -1,10 +1,5 @@
-import { RoutePlaceholder } from "@/components/route-placeholder"
+import { DashboardPage as DashboardPageContent } from "@/components/dashboard/dashboard-page"
 
 export default function DashboardPage() {
-  return (
-    <RoutePlaceholder
-      title="Today"
-      description="Ready work, attention crops, and the next best action."
-    />
-  )
+  return <DashboardPageContent />
 }
