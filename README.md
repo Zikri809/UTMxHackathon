@@ -1,5 +1,5 @@
 # UTMxHackathon
-Case Study 1
+Case Study 1.
 
 ## Planning Docs
 
