@@ -1,5 +1,12 @@
-# UTMxHackathon
-Case Study 1.
+# Harvest Calendar
+
+UTMxHackathon project for Case Study 1.
+
+## Prototype
+
+- Project name: Harvest Calendar
+- Case study: Case Study 1
+- Live prototype: [https://ut-mx-hackathon.vercel.app](https://ut-mx-hackathon.vercel.app)
 
 ## Planning Docs
 
